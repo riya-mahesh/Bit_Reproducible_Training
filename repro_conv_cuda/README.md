@@ -16,4 +16,4 @@ Bias is separate: add it with one IEEE addition, and get its gradient from `repr
 
 **CPU** (`check_repro_conv.cpp`, on an Apple M4 Pro): passes. Forward and weight gradient match the GEMM definition bit for bit at S = 1, 2, 3 and several strides and paddings. The adjoint identities `<dY, Y> = <dX, x> = <dW, W>` hold (about 1e-8 relative at S=3), which shows both gradients are correct. Forward error against the true convolution is about 1e-6 at S=3.
 
-**GPU:** not run yet. `./run_conv.sh`.
+**GPU:** tests pass on RTX 2080 Ti and TITAN V (CUDA 12.4, 12.6; 2080 Ti also 13.0) and RTX 4070 (CUDA 12.4). `./run_conv.sh`.

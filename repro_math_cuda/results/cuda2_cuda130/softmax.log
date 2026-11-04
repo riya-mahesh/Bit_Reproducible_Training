@@ -1,0 +1,214 @@
+=== build ===
+Cuda compilation tools, release 13.0, V13.0.88
+Build cuda_13.0.r13.0/compiler.36424714_0
+=== GPU 0: NVIDIA_GeForce_RTX_2080_Ti ===
+device: NVIDIA GeForce RTX 2080 Ti
+  ok   exp GPU == CPU: random bit patterns
+  ok   log GPU == CPU: random bit patterns
+  ok   exp GPU == CPU: normal, scale 30
+  ok   log GPU == CPU: normal, scale 30
+  ok   exp GPU == CPU: near 1
+  ok   log GPU == CPU: near 1
+  ok   exp GPU == CPU: subnormal exp results
+  ok   log GPU == CPU: subnormal exp results
+  ok   exp GPU == CPU: special values
+  ok   log GPU == CPU: special values
+  ok   all 19 hard cases correctly rounded
+  ok   softmax GPU == CPU: MNIST 100x10
+  ok   softmax repeat run: MNIST 100x10
+  ok   softmax in place: MNIST 100x10
+  ok   softmax independent of order: MNIST 100x10
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): MNIST 100x10
+  ok   softmax GPU == CPU: short rows 2000x3
+  ok   softmax repeat run: short rows 2000x3
+  ok   softmax in place: short rows 2000x3
+  ok   softmax independent of order: short rows 2000x3
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): short rows 2000x3
+  ok   softmax GPU == CPU: one row of 50257
+  ok   softmax repeat run: one row of 50257
+  ok   softmax in place: one row of 50257
+  ok   softmax independent of order: one row of 50257
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): one row of 50257
+  ok   softmax GPU == CPU: vocab 8x50257 (staged)
+  ok   softmax repeat run: vocab 8x50257 (staged)
+  ok   softmax in place: vocab 8x50257 (staged)
+  ok   softmax independent of order: vocab 8x50257 (staged)
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): vocab 8x50257 (staged)
+  ok   softmax GPU == CPU: vocab 256x50257 (fused)
+  ok   softmax repeat run: vocab 256x50257 (fused)
+  ok   softmax in place: vocab 256x50257 (fused)
+  ok   softmax independent of order: vocab 256x50257 (fused)
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): vocab 256x50257 (fused)
+  ok   softmax GPU == CPU: large gaps (subnormal exps) 300x257
+  ok   softmax repeat run: large gaps (subnormal exps) 300x257
+  ok   softmax in place: large gaps (subnormal exps) 300x257
+  ok   softmax independent of order: large gaps (subnormal exps) 300x257
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): large gaps (subnormal exps) 300x257
+  ok   softmax GPU == CPU: single element 5x1
+  ok   softmax repeat run: single element 5x1
+  ok   softmax in place: single element 5x1
+  ok   softmax independent of order: single element 5x1
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): single element 5x1
+  ok   softmax GPU == CPU: causal attention 1024x1024
+  ok   softmax repeat run: causal attention 1024x1024
+  ok   softmax in place: causal attention 1024x1024
+  ok   softmax independent of order: causal attention 1024x1024
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): causal attention 1024x1024
+  ok   masked entries are exactly +0
+  ok   softmax special rows GPU == CPU
+  ok   NaN, +inf, all-(-inf) rows give canonical NaN
+  ok   ties and masks give exact values
+  ok   cross-entropy loss GPU == CPU: MNIST 100x10
+  ok   cross-entropy grad GPU == CPU: MNIST 100x10
+  ok   cross-entropy independent of row order: MNIST 100x10
+  ok   cross-entropy loss GPU == CPU: GPT-2 8x50257, 3 rows ignored (staged)
+  ok   cross-entropy grad GPU == CPU: GPT-2 8x50257, 3 rows ignored (staged)
+  ok   cross-entropy independent of row order: GPT-2 8x50257, 3 rows ignored (staged)
+  ok   cross-entropy loss GPU == CPU: GPT-2 256x50257, 3 rows ignored (fused)
+  ok   cross-entropy grad GPU == CPU: GPT-2 256x50257, 3 rows ignored (fused)
+  ok   cross-entropy independent of row order: GPT-2 256x50257, 3 rows ignored (fused)
+  ok   cross-entropy loss GPU == CPU: short rows 2000x3, 500 rows ignored
+  ok   cross-entropy grad GPU == CPU: short rows 2000x3, 500 rows ignored
+  ok   cross-entropy independent of row order: short rows 2000x3, 500 rows ignored
+  ok   cross-entropy loss GPU == CPU: large gaps 300x257
+  ok   cross-entropy grad GPU == CPU: large gaps 300x257
+  ok   cross-entropy independent of row order: large gaps 300x257
+OVERALL: PASS
+device: NVIDIA GeForce RTX 2080 Ti (sm_75)
+exp, 2^24 elements, normal(-5, 5):
+  CUDA expf (not reproducible)            0.252 ms     0.015 ns/element  x1.00
+  RepDL (float)exp((double)x)             1.860 ms     0.111 ns/element  x7.37
+  repro_expf                              0.488 ms     0.029 ns/element  x1.93
+log, 2^24 elements, uniform(1, 10):
+  CUDA logf (not reproducible)            0.253 ms     0.015 ns/element  x1.00
+  RepDL (float)log((double)x)             3.422 ms     0.204 ns/element  x13.54
+  repro_logf                              1.059 ms     0.063 ns/element  x4.19
+softmax MNIST 16384x10 (x164 batches):
+  float: CUDA expf + float sum            0.017 ms     0.106 ns/element  x1.00
+  float: double exp + float sum           0.066 ms     0.405 ns/element  x3.82
+  repro_softmax                           0.040 ms     0.244 ns/element  x2.31
+  repro_cross_entropy, forward            0.734 ms     4.481 ns/element  x42.29
+  repro_cross_entropy, forward + grad      0.744 ms     4.541 ns/element  x42.85
+softmax attention 12288x1024:
+  float: CUDA expf + float sum            0.497 ms     0.040 ns/element  x1.00
+  float: double exp + float sum           1.441 ms     0.115 ns/element  x2.90
+  repro_softmax                           0.867 ms     0.069 ns/element  x1.74
+  repro_cross_entropy, forward            1.276 ms     0.101 ns/element  x2.57
+  repro_cross_entropy, forward + grad      1.164 ms     0.093 ns/element  x2.34
+softmax vocab 300x50257:
+  float: CUDA expf + float sum            1.964 ms     0.130 ns/element  x1.00
+  float: double exp + float sum           3.374 ms     0.224 ns/element  x1.72
+  repro_softmax                           6.567 ms     0.436 ns/element  x3.34
+  repro_cross_entropy, forward            6.153 ms     0.408 ns/element  x3.13
+  repro_cross_entropy, forward + grad      6.845 ms     0.454 ns/element  x3.48
+device: NVIDIA GeForce RTX 2080 Ti (sm_75)  CUDA runtime 13000  driver 13020
+function         hash(all 2^32)        !=reference       (%)  max_ulp   note
+repro_expf       4ccc7cddaea06b26                0   0.0000%        0   ours: correctly rounded exp
+repro_logf       117fa2a6bbdea567                5   0.0000%        1   ours: correctly rounded log
+block hashes written to results/cuda2_cuda130/repro_gpu0_NVIDIA_GeForce_RTX_2080_Ti.txt
+=== GPU 1: NVIDIA_GeForce_RTX_2080_Ti ===
+device: NVIDIA GeForce RTX 2080 Ti
+  ok   exp GPU == CPU: random bit patterns
+  ok   log GPU == CPU: random bit patterns
+  ok   exp GPU == CPU: normal, scale 30
+  ok   log GPU == CPU: normal, scale 30
+  ok   exp GPU == CPU: near 1
+  ok   log GPU == CPU: near 1
+  ok   exp GPU == CPU: subnormal exp results
+  ok   log GPU == CPU: subnormal exp results
+  ok   exp GPU == CPU: special values
+  ok   log GPU == CPU: special values
+  ok   all 19 hard cases correctly rounded
+  ok   softmax GPU == CPU: MNIST 100x10
+  ok   softmax repeat run: MNIST 100x10
+  ok   softmax in place: MNIST 100x10
+  ok   softmax independent of order: MNIST 100x10
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): MNIST 100x10
+  ok   softmax GPU == CPU: short rows 2000x3
+  ok   softmax repeat run: short rows 2000x3
+  ok   softmax in place: short rows 2000x3
+  ok   softmax independent of order: short rows 2000x3
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): short rows 2000x3
+  ok   softmax GPU == CPU: one row of 50257
+  ok   softmax repeat run: one row of 50257
+  ok   softmax in place: one row of 50257
+  ok   softmax independent of order: one row of 50257
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): one row of 50257
+  ok   softmax GPU == CPU: vocab 8x50257 (staged)
+  ok   softmax repeat run: vocab 8x50257 (staged)
+  ok   softmax in place: vocab 8x50257 (staged)
+  ok   softmax independent of order: vocab 8x50257 (staged)
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): vocab 8x50257 (staged)
+  ok   softmax GPU == CPU: vocab 256x50257 (fused)
+  ok   softmax repeat run: vocab 256x50257 (fused)
+  ok   softmax in place: vocab 256x50257 (fused)
+  ok   softmax independent of order: vocab 256x50257 (fused)
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): vocab 256x50257 (fused)
+  ok   softmax GPU == CPU: large gaps (subnormal exps) 300x257
+  ok   softmax repeat run: large gaps (subnormal exps) 300x257
+  ok   softmax in place: large gaps (subnormal exps) 300x257
+  ok   softmax independent of order: large gaps (subnormal exps) 300x257
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): large gaps (subnormal exps) 300x257
+  ok   softmax GPU == CPU: single element 5x1
+  ok   softmax repeat run: single element 5x1
+  ok   softmax in place: single element 5x1
+  ok   softmax independent of order: single element 5x1
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): single element 5x1
+  ok   softmax GPU == CPU: causal attention 1024x1024
+  ok   softmax repeat run: causal attention 1024x1024
+  ok   softmax in place: causal attention 1024x1024
+  ok   softmax independent of order: causal attention 1024x1024
+  ok   rows sum to 1 (worst |sum-1| = 0.000000): causal attention 1024x1024
+  ok   masked entries are exactly +0
+  ok   softmax special rows GPU == CPU
+  ok   NaN, +inf, all-(-inf) rows give canonical NaN
+  ok   ties and masks give exact values
+  ok   cross-entropy loss GPU == CPU: MNIST 100x10
+  ok   cross-entropy grad GPU == CPU: MNIST 100x10
+  ok   cross-entropy independent of row order: MNIST 100x10
+  ok   cross-entropy loss GPU == CPU: GPT-2 8x50257, 3 rows ignored (staged)
+  ok   cross-entropy grad GPU == CPU: GPT-2 8x50257, 3 rows ignored (staged)
+  ok   cross-entropy independent of row order: GPT-2 8x50257, 3 rows ignored (staged)
+  ok   cross-entropy loss GPU == CPU: GPT-2 256x50257, 3 rows ignored (fused)
+  ok   cross-entropy grad GPU == CPU: GPT-2 256x50257, 3 rows ignored (fused)
+  ok   cross-entropy independent of row order: GPT-2 256x50257, 3 rows ignored (fused)
+  ok   cross-entropy loss GPU == CPU: short rows 2000x3, 500 rows ignored
+  ok   cross-entropy grad GPU == CPU: short rows 2000x3, 500 rows ignored
+  ok   cross-entropy independent of row order: short rows 2000x3, 500 rows ignored
+  ok   cross-entropy loss GPU == CPU: large gaps 300x257
+  ok   cross-entropy grad GPU == CPU: large gaps 300x257
+  ok   cross-entropy independent of row order: large gaps 300x257
+OVERALL: PASS
+device: NVIDIA GeForce RTX 2080 Ti (sm_75)
+exp, 2^24 elements, normal(-5, 5):
+  CUDA expf (not reproducible)            0.252 ms     0.015 ns/element  x1.00
+  RepDL (float)exp((double)x)             1.846 ms     0.110 ns/element  x7.32
+  repro_expf                              0.485 ms     0.029 ns/element  x1.92
+log, 2^24 elements, uniform(1, 10):
+  CUDA logf (not reproducible)            0.252 ms     0.015 ns/element  x1.00
+  RepDL (float)log((double)x)             3.394 ms     0.202 ns/element  x13.45
+  repro_logf                              1.059 ms     0.063 ns/element  x4.20
+softmax MNIST 16384x10 (x164 batches):
+  float: CUDA expf + float sum            0.017 ms     0.105 ns/element  x1.00
+  float: double exp + float sum           0.066 ms     0.405 ns/element  x3.86
+  repro_softmax                           0.040 ms     0.243 ns/element  x2.31
+  repro_cross_entropy, forward            0.734 ms     4.482 ns/element  x42.72
+  repro_cross_entropy, forward + grad      0.538 ms     3.285 ns/element  x31.31
+softmax attention 12288x1024:
+  float: CUDA expf + float sum            0.490 ms     0.039 ns/element  x1.00
+  float: double exp + float sum           1.006 ms     0.080 ns/element  x2.05
+  repro_softmax                           0.707 ms     0.056 ns/element  x1.44
+  repro_cross_entropy, forward            0.912 ms     0.073 ns/element  x1.86
+  repro_cross_entropy, forward + grad      1.136 ms     0.090 ns/element  x2.32
+softmax vocab 300x50257:
+  float: CUDA expf + float sum            1.969 ms     0.131 ns/element  x1.00
+  float: double exp + float sum           3.383 ms     0.224 ns/element  x1.72
+  repro_softmax                           6.645 ms     0.441 ns/element  x3.37
+  repro_cross_entropy, forward            6.198 ms     0.411 ns/element  x3.15
+  repro_cross_entropy, forward + grad      6.893 ms     0.457 ns/element  x3.50
+device: NVIDIA GeForce RTX 2080 Ti (sm_75)  CUDA runtime 13000  driver 13020
+function         hash(all 2^32)        !=reference       (%)  max_ulp   note
+repro_expf       4ccc7cddaea06b26                0   0.0000%        0   ours: correctly rounded exp
+repro_logf       117fa2a6bbdea567                5   0.0000%        1   ours: correctly rounded log
+block hashes written to results/cuda2_cuda130/repro_gpu1_NVIDIA_GeForce_RTX_2080_Ti.txt
+OVERALL: PASS

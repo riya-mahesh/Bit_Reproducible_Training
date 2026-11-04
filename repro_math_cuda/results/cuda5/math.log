@@ -1,0 +1,22 @@
+=== build (default flags: no fast-math, like PyTorch) ===
+Cuda compilation tools, release 12.4, V12.4.131
+Build cuda_12.4.r12.4/compiler.34097967_0
+=== GPU 0: NVIDIA_GeForce_RTX_4070 ===
+device: NVIDIA GeForce RTX 4070 (sm_89)  CUDA runtime 12040  driver 13000
+function         hash(all 2^32)        !=reference       (%)  max_ulp   note
+expf             efcf9b103589d04c        159912805   3.7233%        2   CUDA expf (PyTorch torch.exp)
+__expf           91898753b51ff209        217556132   5.0654%       64   fast-math intrinsic (approximate)
+exp_via_double   85ec9307efd7b93b                0   0.0000%        0   RepDL style: (float)exp((double)x)
+logf             d2be69f1a5439e32         72516688   1.6884%        1   CUDA logf (torch.log)
+log1pf           259742534de2a853         42499897   0.9895%        1   CUDA log1pf
+expm1f           c34e7b82011a1a87         26510788   0.6173%        1   CUDA expm1f
+tanhf            763353ad9cb4eb5c         39501004   0.9197%        2   CUDA tanhf (torch.tanh)
+erff             4c9a18f1a9ee821f        370931198   8.6364%        1   CUDA erff (exact GELU)
+sigmoid_torch    c7c207b23130a782        187336638   4.3618%  2097151   PyTorch formula: 1/(1+expf(-x))
+sqrtf            4e12f1ea5f23e301                0   0.0000%        0   IEEE sqrt (should be exact)
+rsqrtf           4b21108f6f9efc73        463314104  10.7874%        2   approximate reciprocal sqrt
+recip_1/x        d7c46b7097c1ce85                0   0.0000%        0   IEEE division 1/x (should be exact)
+div_x/10         8f591f880356dc84                0   0.0000%        0   IEEE division x/10 (should be exact)
+mul_x*0.1f       7e73ca79c44cac6c        843894164  19.6484%        1   x * 0.1f: what 'x/10' becomes if division is turned into multiplication
+block hashes written to results/cuda5/gpu0_NVIDIA_GeForce_RTX_4070.txt
+Done. Compare GPUs/machines with: ./compare_math.sh <file1> <file2>

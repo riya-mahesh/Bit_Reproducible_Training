@@ -1,0 +1,4 @@
+Hash of the initial model: 3ac26bdaa251ef85452285b3f1bb56924b91e10b952773a69de46ec83c91422c
+Hash of the trained model: 021a79d5cff939de27879bd6e38d6b9921f011ecf2cf7ec86543acba0cba870e
+Test accuracy of the model on the 10000 test images: 0.9815
+Hash of the logits: 035b46b10ab28a3d0c4b32b9b199f7f35712860d2dc11dcb2c042732dc23036e

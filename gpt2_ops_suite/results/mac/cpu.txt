@@ -1,0 +1,48 @@
+# CPU 14 threads tokens=1024 S=3
+OP	attn_qkv.fwd	M=1024 N=2304 K=768 B^T	in=f717589d12c07658	out=0694c9bba1a03388	ms=18.5482	base_ms=-1.0000
+OP	attn_qkv.dX	M=1024 N=768 K=2304	in=1def0bbe8aa4626e	out=4403cea1ec942a80	ms=16.5826	base_ms=-1.0000
+OP	attn_qkv.dW	M=2304 N=768 K=1024 A^T	in=4cf53ab57e3ce5ab	out=014bb47372fe46df	ms=16.5759	base_ms=-1.0000
+OP	attn_proj.fwd	M=1024 N=768 K=768 B^T	in=46dd3a91b61dc793	out=2ad24a70eb9b78a4	ms=6.7129	base_ms=-1.0000
+OP	attn_proj.dX	M=1024 N=768 K=768	in=a47a950cdbdbad69	out=7965e353dbd38c2b	ms=6.5364	base_ms=-1.0000
+OP	attn_proj.dW	M=768 N=768 K=1024 A^T	in=8875bcd8658fbce5	out=41796587ec48e228	ms=6.4125	base_ms=-1.0000
+OP	mlp_fc.fwd	M=1024 N=3072 K=768 B^T	in=fdae6f3970f3fe8b	out=4078a224b3834789	ms=24.6183	base_ms=-1.0000
+OP	mlp_fc.dX	M=1024 N=768 K=3072	in=d057b521131a9f2c	out=a69e67f97ebfb1cd	ms=20.1489	base_ms=-1.0000
+OP	mlp_fc.dW	M=3072 N=768 K=1024 A^T	in=d7077130e5007894	out=0f81482aaee505a0	ms=21.9830	base_ms=-1.0000
+OP	mlp_proj.fwd	M=1024 N=768 K=3072 B^T	in=4852be59efa2ee0a	out=5f3e342869c293a3	ms=20.1881	base_ms=-1.0000
+OP	mlp_proj.dX	M=1024 N=3072 K=768	in=71dc25c7240fbde6	out=48d8a391ce9d2bb3	ms=23.2532	base_ms=-1.0000
+OP	mlp_proj.dW	M=768 N=3072 K=1024 A^T	in=e741de491c78c56a	out=e0147ab9ccbd914a	ms=23.1054	base_ms=-1.0000
+OP	lm_head.fwd	M=1024 N=50257 K=768 B^T	in=b265644b15ea5c6e	out=f8779013fd9bc98e	ms=1228.5809	base_ms=-1.0000
+OP	lm_head.dX	M=1024 N=768 K=50257	in=91d5f60ef9811d69	out=df619a9df0ddc2ae	ms=718.6205	base_ms=-1.0000
+OP	lm_head.dW	M=50257 N=768 K=1024 A^T	in=d47d89b75a0d5d91	out=041cc60891e7c1ef	ms=428.5258	base_ms=-1.0000
+OP	attn_head.scores QK^T	M=1024 N=1024 K=64 B^T	in=5583f430f0a27d10	out=ea40462e9fd9a0ee	ms=3.1483	base_ms=-1.0000
+OP	attn_head.PV	M=1024 N=64 K=1024	in=a51050319f40a2a8	out=e4930c3f6bba0f08	ms=1.9741	base_ms=-1.0000
+OP	attn_head.dP = dO V^T	M=1024 N=1024 K=64 B^T	in=cba8e43dcd4f8afa	out=dfc5ed268bb253b7	ms=2.6550	base_ms=-1.0000
+OP	attn_head.dV = P^T dO	M=1024 N=64 K=1024 A^T	in=1a057d6d2ce2411d	out=915aa015fe5cbe02	ms=2.4439	base_ms=-1.0000
+OP	attn_head.dQ = dS K	M=1024 N=64 K=1024	in=fda2db40fb04de38	out=5154b62e4776d7d7	ms=2.0000	base_ms=-1.0000
+OP	attn_head.dK = dS^T Q	M=1024 N=64 K=1024 A^T	in=4060ea8764645983	out=6a48b39e45a17b10	ms=2.5538	base_ms=-1.0000
+OP	bias_grad attn_qkv	[1024,2304,1] -> 2304	in=da7f2a0b7a9f8138	out=ef9b08ad7d9b823b	ms=0.8740	base_ms=-1.0000
+OP	bias_grad attn_proj	[1024,768,1] -> 768	in=ed8cfc21320c9b83	out=9e9f5b378ae5b3d2	ms=0.4027	base_ms=-1.0000
+OP	bias_grad mlp_fc	[1024,3072,1] -> 3072	in=c48ce5f826d95c3f	out=853fa4c0a01ecd9d	ms=1.3697	base_ms=-1.0000
+OP	bias_grad mlp_proj	[1024,768,1] -> 768	in=ab7c0b0e2666f8e5	out=d6293faab6eb6a18	ms=0.4303	base_ms=-1.0000
+OP	layernorm gamma/beta grad	[1024,768,1] -> 768	in=ca266c60705d971d	out=9117d44c8e513d2f	ms=0.4260	base_ms=-1.0000
+OP	layernorm row sum (mean)	[1,1024,768] -> 1024 mean	in=4277905605231dc4	out=d238fe260a3cd3fd	ms=0.3622	base_ms=-1.0000
+OP	attn softmax row sum (causal)	[1,12288,1024] -> 12288	in=056806d74711ec78	out=a733b74e9eb1a64b	ms=3.6493	base_ms=-1.0000
+OP	cross_entropy row sum (vocab)	[1,1024,50257] -> 1024	in=c7b172770c133524	out=9901f1be335b0dc0	ms=9.4022	base_ms=-1.0000
+OP	loss mean over tokens	[1,1,1024] -> 1 mean	in=ac9cabe786f265f7	out=b364046cad7228cf	ms=0.1935	base_ms=-1.0000
+OP	softmax MNIST logits	[100,10]	in=23a64ef7826c5d64	out=8ab26938df573d0a	ms=0.1734	base_ms=-1.0000
+OP	softmax attention (causal)	[12288,1024]	in=7fba45bdcdc4bb61	out=7eb959fc06834833	ms=15.0120	base_ms=-1.0000
+OP	softmax vocab	[1024,50257]	in=844b13d7a9c354cf	out=ce5b32e00c5551fe	ms=72.6613	base_ms=-1.0000
+OP	lenet conv1.fwd	[100,1,28,28] F=6 5x5	in=ed08e520a70ef6ed	out=c689cd01ad6ef7ee	ms=2.2525	base_ms=-1.0000
+OP	lenet conv1.dW	[100,1,28,28] F=6 5x5	in=3650111d506defe7	out=dd6819d69cf11d2c	ms=11.4959	base_ms=-1.0000
+OP	lenet conv2.fwd	[100,6,14,14] F=16 5x5	in=99157a6c0004d337	out=a0b118e427070cdd	ms=1.1991	base_ms=-1.0000
+OP	lenet conv2.dW	[100,6,14,14] F=16 5x5	in=721d8dea26d16b98	out=73fade1fa85b7889	ms=20.5652	base_ms=-1.0000
+OP	lenet conv2.dX	[100,6,14,14] F=16 5x5	in=c012b256c122caa4	out=42824f195cc74b6c	ms=2.0131	base_ms=-1.0000
+OP	cross_entropy MNIST loss	[100,10]	in=e7240b877b046d0f	out=5a5af49de0a371ca	ms=0.2348	base_ms=-1.0000
+OP	cross_entropy MNIST loss+grad	[100,10]	in=e7240b877b046d0f	out=8b0a16319528f04d	ms=0.1557	base_ms=-1.0000
+OP	cross_entropy vocab loss	[1024,50257]	in=608929bc544e1188	out=78c21e1a9ebec883	ms=46.9994	base_ms=-1.0000
+OP	cross_entropy vocab loss+grad	[1024,50257]	in=608929bc544e1188	out=06368ca76963a093	ms=74.6210	base_ms=-1.0000
+OP	lenet pool1.fwd	[100,6,28,28] 2x2	in=00d8710abe01b876	out=5411da1bdd490466	ms=0.5196	base_ms=-1.0000
+OP	lenet pool1.back	[100,6,28,28] 2x2	in=4d18b73a2f681211	out=e54c09bbba707901	ms=5.3225	base_ms=-1.0000
+OP	lenet pool2.fwd	[100,16,10,10] 2x2	in=c0e171f996f2dbb3	out=39fcc67c9cd0ddcf	ms=0.1967	base_ms=-1.0000
+OP	lenet pool2.back	[100,16,10,10] 2x2	in=77031b968e405e6a	out=8009f6c77c837be1	ms=1.7869	base_ms=-1.0000
+OP	lenet adam step	n=61706	in=9c02f01f5f4705e5	out=ae735902e6f949a6	ms=0.4198	base_ms=-1.0000

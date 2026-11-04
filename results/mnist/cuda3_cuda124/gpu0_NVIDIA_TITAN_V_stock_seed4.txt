@@ -1,0 +1,26 @@
+mode stock device cuda NVIDIA TITAN V torch 2.6.0+cu124 cuda 12.4
+batch 100 lr 0.01 epochs 2 slices 3 seed 4
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init cd386c006d5d340e599fb629ed88be91932d3d283b4a7993d49ad3fef1f0f811
+  epoch 1 step 100 loss 0.2159 (bits 3e5d08d8)
+  epoch 1 step 200 loss 0.1504 (bits 3e19f9dc)
+  epoch 1 step 300 loss 0.0075 (bits 3bf71173)
+  epoch 1 step 400 loss 0.0962 (bits 3dc50c8e)
+  epoch 1 step 500 loss 0.1022 (bits 3dd15d6c)
+  epoch 1 step 600 loss 0.0266 (bits 3cd99193)
+hash weights after epoch 1 (600 steps) f550144e130bd0ea76370ddd4cfc87e6b9f2c3b15e9c9b6b77c8e141dfd5b531
+test accuracy after epoch 1: 0.9762
+  epoch 2 step 700 loss 0.1364 (bits 3e0ba9aa)
+  epoch 2 step 800 loss 0.0721 (bits 3d93a505)
+  epoch 2 step 900 loss 0.0367 (bits 3d163026)
+  epoch 2 step 1000 loss 0.1419 (bits 3e114cd1)
+  epoch 2 step 1100 loss 0.0210 (bits 3cac5a26)
+  epoch 2 step 1200 loss 0.0510 (bits 3d50c2ba)
+hash weights after epoch 2 (1200 steps) f5bd7439f7b0896c96ffb94c721afaf021da9c4b67c60e6aa41ef472f986291a
+test accuracy after epoch 2: 0.9833
+hash test logits 7cccb8e277a5c1de718945a23f6c26d3b34fd4004c521dd3ca70ed1db02bcb95
+hash train logits aa8be4b95b8daf23160ae2d1b8f02456d71436f62e22000511aa372cb004fcb5
+train accuracy 0.9840
+test accuracy 0.9833
+time train total 2.57 s; per step median 1.881 ms, mean 1.887 ms (1200 steps)
+peak GPU memory 235.0 MiB

@@ -1,0 +1,44 @@
+{
+ "mode": "stock",
+ "tag": "",
+ "host": "mac",
+ "device": "arm",
+ "driver": "none",
+ "torch": "2.8.0",
+ "cuda": null,
+ "seed": 1,
+ "slices": 3,
+ "batch": 100,
+ "lr": 0.01,
+ "epochs": 2,
+ "steps": 1200,
+ "profile": false,
+ "hashes": {
+  "weights_epoch_1": "192c878e31ed0f3f05ecbaac13a5ba94b8c057f50604c3ba1d69397a749d0e1f",
+  "weights_epoch_2": "8f66da8a3aa76fe56362641d72ed44303589d7fb1551224800ba5f0842ef70ba",
+  "test_logits": "cf33f43c16553711554d549ee20859a5678f7c5676dea06bc697de3053346922",
+  "train_logits": "f03ae1b6b2f5f93a63771d8d93345f61ba29f5d17162702f9a3890052e02a922",
+  "init": "7da4f3954ddb110e522576fbc1e95c498de8e449aef906b8d62f9dbbd2388eda"
+ },
+ "train_accuracy": 0.98345,
+ "test_accuracy": 0.9812,
+ "curve": [
+  {
+   "epoch": 1,
+   "step": 600,
+   "test_accuracy": 0.9742
+  },
+  {
+   "epoch": 2,
+   "step": 1200,
+   "test_accuracy": 0.9812
+  }
+ ],
+ "final_loss": 0.20954062044620514,
+ "train_seconds": 23.074101406000054,
+ "step_ms_median": 19.190874999999608,
+ "step_ms_mean": 19.207545773221803,
+ "step_ms_p95": 19.771332999999558,
+ "breakdown_ms": {},
+ "peak_memory_mib": 0.0
+}

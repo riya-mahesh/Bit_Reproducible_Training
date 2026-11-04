@@ -1,0 +1,146 @@
+=== build ===
+  ok   forward == GEMM on im2col, bit for bit       LeNet conv1, S=3
+  ok   weight grad == GEMM dY^T X, bit for bit      LeNet conv1, S=3
+  ok   forward relative error 6.25e-07              LeNet conv1, S=3
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 2.24e-09 LeNet conv1, S=3
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 1.49e-09 LeNet conv1, S=3
+  ok   forward == GEMM on im2col, bit for bit       LeNet conv2, S=3
+  ok   weight grad == GEMM dY^T X, bit for bit      LeNet conv2, S=3
+  ok   forward relative error 8.42e-07              LeNet conv2, S=3
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 5.36e-11 LeNet conv2, S=3
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 1.19e-09 LeNet conv2, S=3
+  ok   forward == GEMM on im2col, bit for bit       LeNet conv1, S=1
+  ok   weight grad == GEMM dY^T X, bit for bit      LeNet conv1, S=1
+  ok   forward relative error 1.07e-02              LeNet conv1, S=1
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 4.53e-05 LeNet conv1, S=1
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 2.33e-05 LeNet conv1, S=1
+  ok   forward == GEMM on im2col, bit for bit       LeNet conv1, S=2
+  ok   weight grad == GEMM dY^T X, bit for bit      LeNet conv1, S=2
+  ok   forward relative error 8.35e-05              LeNet conv1, S=2
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 9.21e-07 LeNet conv1, S=2
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 1.31e-07 LeNet conv1, S=2
+  ok   forward == GEMM on im2col, bit for bit       stride 2, padding 1, non-square
+  ok   weight grad == GEMM dY^T X, bit for bit      stride 2, padding 1, non-square
+  ok   forward relative error 7.15e-07              stride 2, padding 1, non-square
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 2.61e-08 stride 2, padding 1, non-square
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 8.99e-09 stride 2, padding 1, non-square
+  ok   forward == GEMM on im2col, bit for bit       stride (3,1)
+  ok   weight grad == GEMM dY^T X, bit for bit      stride (3,1)
+  ok   forward relative error 6.64e-07              stride (3,1)
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 5.42e-08 stride (3,1)
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 2.14e-08 stride (3,1)
+  ok   forward == GEMM on im2col, bit for bit       1x1 filter
+  ok   weight grad == GEMM dY^T X, bit for bit      1x1 filter
+  ok   forward relative error 5.41e-07              1x1 filter
+  ok   adjoint: |<dY,Y>-<dX,x>| / |dY||Y| = 9.56e-09 1x1 filter
+  ok   adjoint: |<dY,Y>-<dW,W>| / |dY||Y| = 3.31e-08 1x1 filter
+OVERALL: PASS
+=== GPU 0: NVIDIA TITAN V ===
+device: NVIDIA TITAN V
+  ok   forward GPU == CPU: LeNet conv1, S=3
+  ok   weight grad GPU == CPU: LeNet conv1, S=3
+  ok   input grad GPU == CPU: LeNet conv1, S=3
+  ok   repeat runs identical: LeNet conv1, S=3
+  ok   forward == repro_gemm on im2col: LeNet conv1, S=3
+  ok   weight grad == repro_gemm dY^T X: LeNet conv1, S=3
+  ok   forward GPU == CPU: LeNet conv2, S=3
+  ok   weight grad GPU == CPU: LeNet conv2, S=3
+  ok   input grad GPU == CPU: LeNet conv2, S=3
+  ok   repeat runs identical: LeNet conv2, S=3
+  ok   forward == repro_gemm on im2col: LeNet conv2, S=3
+  ok   weight grad == repro_gemm dY^T X: LeNet conv2, S=3
+  ok   forward GPU == CPU: LeNet conv1, S=1
+  ok   weight grad GPU == CPU: LeNet conv1, S=1
+  ok   input grad GPU == CPU: LeNet conv1, S=1
+  ok   repeat runs identical: LeNet conv1, S=1
+  ok   forward == repro_gemm on im2col: LeNet conv1, S=1
+  ok   weight grad == repro_gemm dY^T X: LeNet conv1, S=1
+  ok   forward GPU == CPU: stride 2, padding 1, non-square
+  ok   weight grad GPU == CPU: stride 2, padding 1, non-square
+  ok   input grad GPU == CPU: stride 2, padding 1, non-square
+  ok   repeat runs identical: stride 2, padding 1, non-square
+  ok   forward == repro_gemm on im2col: stride 2, padding 1, non-square
+  ok   weight grad == repro_gemm dY^T X: stride 2, padding 1, non-square
+  ok   forward GPU == CPU: stride (3,1)
+  ok   weight grad GPU == CPU: stride (3,1)
+  ok   input grad GPU == CPU: stride (3,1)
+  ok   repeat runs identical: stride (3,1)
+  ok   forward == repro_gemm on im2col: stride (3,1)
+  ok   weight grad == repro_gemm dY^T X: stride (3,1)
+  ok   forward GPU == CPU: many filters
+  ok   weight grad GPU == CPU: many filters
+  ok   input grad GPU == CPU: many filters
+  ok   repeat runs identical: many filters
+  ok   forward == repro_gemm on im2col: many filters
+  ok   weight grad == repro_gemm dY^T X: many filters
+OVERALL: PASS
+device: NVIDIA TITAN V (sm_70), S=3, milliseconds per batch of 100
+conv1 [100,1,28,28] -> 6 filters, 5 x 5:
+  float direct, forward                  0.040
+  repro_conv forward                     0.066
+  im2col copy only                       0.058
+  repro_gemm on im2col (no copy)         0.425
+  repro_conv weight grad                 0.805
+  repro_conv input grad                  0.074
+conv2 [100,6,14,14] -> 16 filters, 5 x 5:
+  float direct, forward                  0.210
+  repro_conv forward                     0.232
+  im2col copy only                       0.046
+  repro_gemm on im2col (no copy)         0.115
+  repro_conv weight grad                 0.685
+  repro_conv input grad                  0.085
+=== GPU 1: NVIDIA TITAN V ===
+device: NVIDIA TITAN V
+  ok   forward GPU == CPU: LeNet conv1, S=3
+  ok   weight grad GPU == CPU: LeNet conv1, S=3
+  ok   input grad GPU == CPU: LeNet conv1, S=3
+  ok   repeat runs identical: LeNet conv1, S=3
+  ok   forward == repro_gemm on im2col: LeNet conv1, S=3
+  ok   weight grad == repro_gemm dY^T X: LeNet conv1, S=3
+  ok   forward GPU == CPU: LeNet conv2, S=3
+  ok   weight grad GPU == CPU: LeNet conv2, S=3
+  ok   input grad GPU == CPU: LeNet conv2, S=3
+  ok   repeat runs identical: LeNet conv2, S=3
+  ok   forward == repro_gemm on im2col: LeNet conv2, S=3
+  ok   weight grad == repro_gemm dY^T X: LeNet conv2, S=3
+  ok   forward GPU == CPU: LeNet conv1, S=1
+  ok   weight grad GPU == CPU: LeNet conv1, S=1
+  ok   input grad GPU == CPU: LeNet conv1, S=1
+  ok   repeat runs identical: LeNet conv1, S=1
+  ok   forward == repro_gemm on im2col: LeNet conv1, S=1
+  ok   weight grad == repro_gemm dY^T X: LeNet conv1, S=1
+  ok   forward GPU == CPU: stride 2, padding 1, non-square
+  ok   weight grad GPU == CPU: stride 2, padding 1, non-square
+  ok   input grad GPU == CPU: stride 2, padding 1, non-square
+  ok   repeat runs identical: stride 2, padding 1, non-square
+  ok   forward == repro_gemm on im2col: stride 2, padding 1, non-square
+  ok   weight grad == repro_gemm dY^T X: stride 2, padding 1, non-square
+  ok   forward GPU == CPU: stride (3,1)
+  ok   weight grad GPU == CPU: stride (3,1)
+  ok   input grad GPU == CPU: stride (3,1)
+  ok   repeat runs identical: stride (3,1)
+  ok   forward == repro_gemm on im2col: stride (3,1)
+  ok   weight grad == repro_gemm dY^T X: stride (3,1)
+  ok   forward GPU == CPU: many filters
+  ok   weight grad GPU == CPU: many filters
+  ok   input grad GPU == CPU: many filters
+  ok   repeat runs identical: many filters
+  ok   forward == repro_gemm on im2col: many filters
+  ok   weight grad == repro_gemm dY^T X: many filters
+OVERALL: PASS
+device: NVIDIA TITAN V (sm_70), S=3, milliseconds per batch of 100
+conv1 [100,1,28,28] -> 6 filters, 5 x 5:
+  float direct, forward                  0.036
+  repro_conv forward                     0.063
+  im2col copy only                       0.052
+  repro_gemm on im2col (no copy)         0.382
+  repro_conv weight grad                 0.718
+  repro_conv input grad                  0.068
+conv2 [100,6,14,14] -> 16 filters, 5 x 5:
+  float direct, forward                  0.187
+  repro_conv forward                     0.214
+  im2col copy only                       0.042
+  repro_gemm on im2col (no copy)         0.104
+  repro_conv weight grad                 0.637
+  repro_conv input grad                  0.077
+OVERALL: PASS

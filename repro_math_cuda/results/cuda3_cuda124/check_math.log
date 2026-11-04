@@ -1,0 +1,29 @@
+hard cases: 0 of 19 wrong
+
+repro_expf: 4294967296 inputs
+  wrong vs double-double reference: 0
+  CORE-MATH comparison:             not built
+  fast path max error: 2^-44.78 at bits c03334a9; bound in the rounding test: 2^-44.00  (ok)
+  slow path: 625 inputs, 1 in 6871948
+
+repro_logf: 4294967296 inputs
+  wrong vs double-double reference: 0
+  CORE-MATH comparison:             not built
+  fast path max error: 2^-44.95 at bits 6e8b3a82; bound in the rounding test: 2^-44.00  (ok)
+  slow path: 2866 inputs, 1 in 1498593
+
+OVERALL: PASS
+mpmath: 1072568 inputs checked, 0 wrong
+device: CPU (glibc 2.34), 48 threads
+function         hash(all 2^32)        !=reference       (%)  max_ulp   note
+repro_expf       4ccc7cddaea06b26                0   0.0000%        0   ours: correctly rounded exp
+repro_logf       117fa2a6bbdea567                5   0.0000%        1   ours: correctly rounded log
+block hashes written to results/cuda3_cuda124/cpu_repro.txt
+  ok   all rows ignored: NaN loss, zero gradient
+  ok   out-of-range target: NaN
+  ok   seed scales the gradient
+  ok   NaN logit: NaN loss, that row NaN
+  ok   masked -inf logit away from the target is exact 0
+OVERALL: PASS
+exact definition: 7 cases, 0 values wrong
+vs PyTorch double: worst relative loss difference 3.81e-08, worst gradient difference 1.30e-07

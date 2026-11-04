@@ -10,4 +10,4 @@ The definitions are in `repro_nn_math.cuh`. The same scalar code runs on the GPU
 
 **CPU** (Apple M4 Pro): every Adam rounding over 25 steps and 3 configurations matches an exact-rational recomputation. MaxPool outputs and indices match `torch.nn.functional.max_pool2d` on inputs without ties. In double, backward differs from PyTorch's by at most 1.8e-7 and Adam's weights by at most 1.7e-6 after 25 steps.
 
-**GPU:** not run yet. `./run_nn.sh`.
+**GPU:** tests pass on RTX 2080 Ti and TITAN V (CUDA 12.4, 12.6; 2080 Ti also 13.0) and RTX 4070 (CUDA 12.4). `./run_nn.sh`.

@@ -1,0 +1,33 @@
+=== build ===
+  ok   tie keeps the first in row-major order
+  ok   +0 and -0 tie keeps the first
+  ok   backward sends the gradient to the index
+  ok   backward gives +0 for a -0 gradient
+  ok   overlapping windows pick their largest
+  ok   shared pixel gets the exact sum
+  ok   shared pixel is rounded once
+OVERALL: PASS
+exact and torch comparison: 4 pool cases, 3 Adam runs, 0 values wrong
+worst differences from torch in double: pool backward 1.19e-07, Adam weights after 25 steps 1.66e-06
+=== GPU 0: NVIDIA GeForce RTX 4070 ===
+device: NVIDIA GeForce RTX 4070
+  ok   pool output GPU == CPU: LeNet pool1
+  ok   pool index GPU == CPU: LeNet pool1
+  ok   pool backward GPU == CPU: LeNet pool1
+  ok   pool output GPU == CPU: LeNet pool1, many ties
+  ok   pool index GPU == CPU: LeNet pool1, many ties
+  ok   pool backward GPU == CPU: LeNet pool1, many ties
+  ok   pool output GPU == CPU: LeNet pool2, many ties
+  ok   pool index GPU == CPU: LeNet pool2, many ties
+  ok   pool backward GPU == CPU: LeNet pool2, many ties
+  ok   pool output GPU == CPU: overlapping 3x2 stride (1,2), many ties
+  ok   pool index GPU == CPU: overlapping 3x2 stride (1,2), many ties
+  ok   pool backward GPU == CPU: overlapping 3x2 stride (1,2), many ties
+  ok   pool output GPU == CPU: large plane 300x300
+  ok   pool index GPU == CPU: large plane 300x300
+  ok   pool backward GPU == CPU: large plane 300x300
+  ok   Adam GPU == CPU over 200 steps (p, m, v): lr 0.01
+  ok   Adam GPU == CPU over 200 steps (p, m, v): Adam with weight decay
+  ok   Adam GPU == CPU over 200 steps (p, m, v): AdamW
+OVERALL: PASS
+OVERALL: PASS

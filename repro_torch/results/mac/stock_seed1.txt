@@ -1,0 +1,25 @@
+mode stock device cpu arm torch 2.8.0 cuda None
+batch 100 lr 0.01 epochs 2 slices 3 seed 1
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init 7da4f3954ddb110e522576fbc1e95c498de8e449aef906b8d62f9dbbd2388eda
+  epoch 1 step 100 loss 0.2793 (bits 3e8f0629)
+  epoch 1 step 200 loss 0.1450 (bits 3e146f22)
+  epoch 1 step 300 loss 0.3179 (bits 3ea2c320)
+  epoch 1 step 400 loss 0.1485 (bits 3e181366)
+  epoch 1 step 500 loss 0.0747 (bits 3d98eb99)
+  epoch 1 step 600 loss 0.1825 (bits 3e3aded8)
+hash weights after epoch 1 (600 steps) 192c878e31ed0f3f05ecbaac13a5ba94b8c057f50604c3ba1d69397a749d0e1f
+test accuracy after epoch 1: 0.9742
+  epoch 2 step 700 loss 0.0802 (bits 3da42aff)
+  epoch 2 step 800 loss 0.0454 (bits 3d39c13f)
+  epoch 2 step 900 loss 0.0681 (bits 3d8b8957)
+  epoch 2 step 1000 loss 0.1544 (bits 3e1e270e)
+  epoch 2 step 1100 loss 0.1947 (bits 3e475f38)
+  epoch 2 step 1200 loss 0.2095 (bits 3e5691d1)
+hash weights after epoch 2 (1200 steps) 8f66da8a3aa76fe56362641d72ed44303589d7fb1551224800ba5f0842ef70ba
+test accuracy after epoch 2: 0.9812
+hash test logits cf33f43c16553711554d549ee20859a5678f7c5676dea06bc697de3053346922
+hash train logits f03ae1b6b2f5f93a63771d8d93345f61ba29f5d17162702f9a3890052e02a922
+train accuracy 0.9835
+test accuracy 0.9812
+time train total 23.07 s; per step median 19.191 ms, mean 19.208 ms (1200 steps)

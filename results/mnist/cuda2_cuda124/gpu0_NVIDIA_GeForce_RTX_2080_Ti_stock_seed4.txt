@@ -1,0 +1,26 @@
+mode stock device cuda NVIDIA GeForce RTX 2080 Ti torch 2.6.0+cu124 cuda 12.4
+batch 100 lr 0.01 epochs 2 slices 3 seed 4
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init cd386c006d5d340e599fb629ed88be91932d3d283b4a7993d49ad3fef1f0f811
+  epoch 1 step 100 loss 0.2138 (bits 3e5af2c6)
+  epoch 1 step 200 loss 0.2091 (bits 3e561312)
+  epoch 1 step 300 loss 0.0049 (bits 3ba0928e)
+  epoch 1 step 400 loss 0.1277 (bits 3e02badc)
+  epoch 1 step 500 loss 0.0663 (bits 3d87b953)
+  epoch 1 step 600 loss 0.0440 (bits 3d340756)
+hash weights after epoch 1 (600 steps) 88f2be9813b099f3c50fcb8c9cd79484ea55c1eb1e8466c027cb81d6dea022a9
+test accuracy after epoch 1: 0.9761
+  epoch 2 step 700 loss 0.0859 (bits 3daff108)
+  epoch 2 step 800 loss 0.1131 (bits 3de7939d)
+  epoch 2 step 900 loss 0.0157 (bits 3c809574)
+  epoch 2 step 1000 loss 0.0489 (bits 3d4858fa)
+  epoch 2 step 1100 loss 0.0434 (bits 3d31a57a)
+  epoch 2 step 1200 loss 0.0276 (bits 3ce2066d)
+hash weights after epoch 2 (1200 steps) 43240bd628be111ca2d7d38cd34c2956e739840c7b84acda05edadb50838aaa1
+test accuracy after epoch 2: 0.9779
+hash test logits 2ed29b52291d1fee543c8df647950b781eb42edb3d39c815b3c7ce67088cd699
+hash train logits ac9b481d40cf73b1e9d885672bf8060644c88a9d48d5b321cb3cf4b9e7ad053b
+train accuracy 0.9812
+test accuracy 0.9779
+time train total 3.65 s; per step median 2.822 ms, mean 2.824 ms (1200 steps)
+peak GPU memory 236.3 MiB

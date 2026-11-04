@@ -1,0 +1,98 @@
+=== build ===
+=== CPU:  Intel(R) Xeon(R) CPU E5-2660 v3 @ 2.60GHz ===
+device: CPU 40 threads | GPT-2 small, 1024 tokens, S=3, 10 reps
+operation                          shape                      input hash       output hash              ms                   
+attn_qkv.fwd                       M=1024 N=2304 K=768 B^T    f717589d12c07658 0694c9bba1a03388     86.472                   
+attn_qkv.dX                        M=1024 N=768 K=2304        1def0bbe8aa4626e 4403cea1ec942a80     81.740                   
+attn_qkv.dW                        M=2304 N=768 K=1024 A^T    4cf53ab57e3ce5ab 014bb47372fe46df     79.075                   
+attn_proj.fwd                      M=1024 N=768 K=768 B^T     46dd3a91b61dc793 2ad24a70eb9b78a4     32.498                   
+attn_proj.dX                       M=1024 N=768 K=768         a47a950cdbdbad69 7965e353dbd38c2b     31.501                   
+attn_proj.dW                       M=768 N=768 K=1024 A^T     8875bcd8658fbce5 41796587ec48e228     32.350                   
+mlp_fc.fwd                         M=1024 N=3072 K=768 B^T    fdae6f3970f3fe8b 4078a224b3834789    105.554                   
+mlp_fc.dX                          M=1024 N=768 K=3072        d057b521131a9f2c a69e67f97ebfb1cd    103.271                   
+mlp_fc.dW                          M=3072 N=768 K=1024 A^T    d7077130e5007894 0f81482aaee505a0    111.392                   
+mlp_proj.fwd                       M=1024 N=768 K=3072 B^T    4852be59efa2ee0a 5f3e342869c293a3    107.808                   
+mlp_proj.dX                        M=1024 N=3072 K=768        71dc25c7240fbde6 48d8a391ce9d2bb3    104.391                   
+mlp_proj.dW                        M=768 N=3072 K=1024 A^T    e741de491c78c56a e0147ab9ccbd914a    107.047                   
+lm_head.fwd                        M=1024 N=50257 K=768 B^T   b265644b15ea5c6e f8779013fd9bc98e   1661.339                   
+lm_head.dX                         M=1024 N=768 K=50257       91d5f60ef9811d69 df619a9df0ddc2ae   1778.690                   
+lm_head.dW                         M=50257 N=768 K=1024 A^T   d47d89b75a0d5d91 041cc60891e7c1ef   1591.300                   
+attn_head.scores QK^T              M=1024 N=1024 K=64 B^T     5583f430f0a27d10 ea40462e9fd9a0ee     10.340                   
+attn_head.PV                       M=1024 N=64 K=1024         a51050319f40a2a8 e4930c3f6bba0f08      8.692                   
+attn_head.dP = dO V^T              M=1024 N=1024 K=64 B^T     cba8e43dcd4f8afa dfc5ed268bb253b7     10.035                   
+attn_head.dV = P^T dO              M=1024 N=64 K=1024 A^T     1a057d6d2ce2411d 915aa015fe5cbe02      8.855                   
+attn_head.dQ = dS K                M=1024 N=64 K=1024         fda2db40fb04de38 5154b62e4776d7d7      8.697                   
+attn_head.dK = dS^T Q              M=1024 N=64 K=1024 A^T     4060ea8764645983 6a48b39e45a17b10      8.765                   
+bias_grad attn_qkv                 [1024,2304,1] -> 2304      da7f2a0b7a9f8138 ef9b08ad7d9b823b      4.113                   
+bias_grad attn_proj                [1024,768,1] -> 768        ed8cfc21320c9b83 9e9f5b378ae5b3d2      2.002                   
+bias_grad mlp_fc                   [1024,3072,1] -> 3072      c48ce5f826d95c3f 853fa4c0a01ecd9d      5.095                   
+bias_grad mlp_proj                 [1024,768,1] -> 768        ab7c0b0e2666f8e5 d6293faab6eb6a18      1.724                   
+layernorm gamma/beta grad          [1024,768,1] -> 768        ca266c60705d971d 9117d44c8e513d2f      2.018                   
+layernorm row sum (mean)           [1,1024,768] -> 1024 mean  4277905605231dc4 d238fe260a3cd3fd      1.623                   
+attn softmax row sum (causal)      [1,12288,1024] -> 12288    056806d74711ec78 a733b74e9eb1a64b      4.176                   
+cross_entropy row sum (vocab)      [1,1024,50257] -> 1024     c7b172770c133524 9901f1be335b0dc0     12.633                   
+loss mean over tokens              [1,1,1024] -> 1 mean       ac9cabe786f265f7 b364046cad7228cf      1.508                   
+softmax MNIST logits               [100,10]                   23a64ef7826c5d64 8ab26938df573d0a      1.379                   
+softmax attention (causal)         [12288,1024]               7fba45bdcdc4bb61 7eb959fc06834833     36.300                   
+softmax vocab                      [1024,50257]               844b13d7a9c354cf ce5b32e00c5551fe    160.718                   
+lenet conv1.fwd                    [100,1,28,28] F=6 5x5      ed08e520a70ef6ed c689cd01ad6ef7ee      3.497                   
+lenet conv1.dW                     [100,1,28,28] F=6 5x5      3650111d506defe7 dd6819d69cf11d2c     39.483                   
+lenet conv2.fwd                    [100,6,14,14] F=16 5x5     99157a6c0004d337 a0b118e427070cdd      2.918                   
+lenet conv2.dW                     [100,6,14,14] F=16 5x5     721d8dea26d16b98 73fade1fa85b7889     43.544                   
+lenet conv2.dX                     [100,6,14,14] F=16 5x5     c012b256c122caa4 42824f195cc74b6c      4.183                   
+cross_entropy MNIST loss           [100,10]                   e7240b877b046d0f 5a5af49de0a371ca      1.321                   
+cross_entropy MNIST loss+grad      [100,10]                   e7240b877b046d0f 8b0a16319528f04d      1.345                   
+cross_entropy vocab loss           [1024,50257]               608929bc544e1188 78c21e1a9ebec883     98.473                   
+cross_entropy vocab loss+grad      [1024,50257]               608929bc544e1188 06368ca76963a093    165.696                   
+lenet pool1.fwd                    [100,6,28,28] 2x2          00d8710abe01b876 5411da1bdd490466      1.191                   
+lenet pool1.back                   [100,6,28,28] 2x2          4d18b73a2f681211 e54c09bbba707901     15.700                   
+lenet pool2.fwd                    [100,16,10,10] 2x2         c0e171f996f2dbb3 39fcc67c9cd0ddcf      0.407                   
+lenet pool2.back                   [100,16,10,10] 2x2         77031b968e405e6a 8009f6c77c837be1      5.350                   
+lenet adam step                    n=61706                    9c02f01f5f4705e5 ae735902e6f949a6      0.497                   
+
+PENDING (not implemented yet, will be added to this suite):
+  - exact dot product / sum of squares (LayerNorm variance, softmax backward, grad-norm)
+  - LayerNorm forward/backward
+  - softmax backward and a fused softmax kernel
+  - GELU (tanh) forward/backward
+  - embedding forward/backward (exact scatter-add by token id)
+  - batched attention GEMM (all heads at once)
+  - AdamW + global-norm gradient clipping
+=== GPU 0: NVIDIA_GeForce_RTX_2080_Ti ===
+device: GPU NVIDIA GeForce RTX 2080 Ti sm_75 CUDA 12040 | GPT-2 small, 1024 tokens, S=3, 10 reps
+operation                          shape                      input hash       output hash              ms    base_ms  x base
+attn_qkv.fwd                       M=1024 N=2304 K=768 B^T    f717589d12c07658 0694c9bba1a03388      0.470   0.417152    1.13
+attn_qkv.dX                        M=1024 N=768 K=2304        1def0bbe8aa4626e 4403cea1ec942a80      0.529   0.367520    1.44
+attn_qkv.dW                        M=2304 N=768 K=1024 A^T    4cf53ab57e3ce5ab 014bb47372fe46df      0.534   0.370688    1.44
+attn_proj.fwd                      M=1024 N=768 K=768 B^T     46dd3a91b61dc793 2ad24a70eb9b78a4      0.180   0.148736    1.21
+attn_proj.dX                       M=1024 N=768 K=768         a47a950cdbdbad69 7965e353dbd38c2b      0.203   0.164256    1.23
+attn_proj.dW                       M=768 N=768 K=1024 A^T     8875bcd8658fbce5 41796587ec48e228      0.280   0.145408    1.93
+mlp_fc.fwd                         M=1024 N=3072 K=768 B^T    fdae6f3970f3fe8b 4078a224b3834789      0.619   0.478560    1.29
+mlp_fc.dX                          M=1024 N=768 K=3072        d057b521131a9f2c a69e67f97ebfb1cd      0.699   0.478976    1.46
+mlp_fc.dW                          M=3072 N=768 K=1024 A^T    d7077130e5007894 0f81482aaee505a0      0.660   0.471008    1.40
+mlp_proj.fwd                       M=1024 N=768 K=3072 B^T    4852be59efa2ee0a 5f3e342869c293a3      0.582   0.509216    1.14
+mlp_proj.dX                        M=1024 N=3072 K=768        71dc25c7240fbde6 48d8a391ce9d2bb3      0.635   0.466944    1.36
+mlp_proj.dW                        M=768 N=3072 K=1024 A^T    e741de491c78c56a e0147ab9ccbd914a      0.654   0.512672    1.28
+lm_head.fwd                        M=1024 N=50257 K=768 B^T   b265644b15ea5c6e f8779013fd9bc98e      9.383   7.222848    1.30
+lm_head.dX                         M=1024 N=768 K=50257       91d5f60ef9811d69 df619a9df0ddc2ae      8.852   6.061472    1.46
+lm_head.dW                         M=50257 N=768 K=1024 A^T   d47d89b75a0d5d91 041cc60891e7c1ef      8.287   5.140160    1.61
+attn_head.scores QK^T              M=1024 N=1024 K=64 B^T     5583f430f0a27d10 ea40462e9fd9a0ee      0.055   0.023040    2.41
+attn_head.PV                       M=1024 N=64 K=1024         a51050319f40a2a8 e4930c3f6bba0f08      0.089   0.028864    3.08
+attn_head.dP = dO V^T              M=1024 N=1024 K=64 B^T     cba8e43dcd4f8afa dfc5ed268bb253b7      0.055   0.023584    2.34
+attn_head.dV = P^T dO              M=1024 N=64 K=1024 A^T     1a057d6d2ce2411d 915aa015fe5cbe02      0.114   0.026464    4.31
+attn_head.dQ = dS K                M=1024 N=64 K=1024         fda2db40fb04de38 5154b62e4776d7d7      0.089   0.028672    3.11
+attn_head.dK = dS^T Q              M=1024 N=64 K=1024 A^T     4060ea8764645983 6a48b39e45a17b10      0.115   0.026432    4.34
+bias_grad attn_qkv                 [1024,2304,1] -> 2304      da7f2a0b7a9f8138 ef9b08ad7d9b823b      0.068   0.037632    1.80
+bias_grad attn_proj                [1024,768,1] -> 768        ed8cfc21320c9b83 9e9f5b378ae5b3d2      0.035   0.024576    1.42
+bias_grad mlp_fc                   [1024,3072,1] -> 3072      c48ce5f826d95c3f 853fa4c0a01ecd9d      0.079   0.038336    2.07
+bias_grad mlp_proj                 [1024,768,1] -> 768        ab7c0b0e2666f8e5 d6293faab6eb6a18      0.035   0.024576    1.42
+layernorm gamma/beta grad          [1024,768,1] -> 768        ca266c60705d971d 9117d44c8e513d2f      0.035   0.025088    1.40
+layernorm row sum (mean)           [1,1024,768] -> 1024 mean  4277905605231dc4 d238fe260a3cd3fd      0.011   0.005984    1.77
+attn softmax row sum (causal)      [1,12288,1024] -> 12288    056806d74711ec78 a733b74e9eb1a64b      0.123   0.091296    1.35
+cross_entropy row sum (vocab)      [1,1024,50257] -> 1024     c7b172770c133524 9901f1be335b0dc0      0.372   0.363616    1.02
+loss mean over tokens              [1,1,1024] -> 1 mean       ac9cabe786f265f7 b364046cad7228cf      0.008   0.007296    1.04
+softmax MNIST logits               [100,10]                   23a64ef7826c5d64 8ab26938df573d0a      0.006   0.004896    1.25
+softmax attention (causal)         [12288,1024]               7fba45bdcdc4bb61 7eb959fc06834833      0.568   0.493536    1.15
+softmax vocab                      [1024,50257]               844b13d7a9c354cf ce5b32e00c5551fe      7.664   4.760864    1.61
+terminate called after throwing an instance of 'std::bad_function_call'
+  what():  bad_function_call

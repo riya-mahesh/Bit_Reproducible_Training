@@ -1,0 +1,128 @@
+=== build ===
+=== GPU 0: NVIDIA TITAN V ===
+Linear bias grad 100x120       normal  PASS
+Linear bias grad 100x120       wide    PASS
+Linear bias grad 100x120       cancel  PASS
+Linear bias grad 100x84        normal  PASS
+Linear bias grad 100x84        wide    PASS
+Linear bias grad 100x84        cancel  PASS
+Linear bias grad 100x10        normal  PASS
+Linear bias grad 100x10        wide    PASS
+Linear bias grad 100x10        cancel  PASS
+Conv1 bias grad 100x6x28x28    normal  PASS
+Conv1 bias grad 100x6x28x28    wide    PASS
+Conv1 bias grad 100x6x28x28    cancel  PASS
+Conv2 bias grad 100x16x10x10   normal  PASS
+Conv2 bias grad 100x16x10x10   wide    PASS
+Conv2 bias grad 100x16x10x10   cancel  PASS
+Loss over batch of 100         normal  PASS
+Loss over batch of 100         wide    PASS
+Loss over batch of 100         cancel  PASS
+Softmax row sums 100x10        normal  PASS
+Softmax row sums 100x10        wide    PASS
+Softmax row sums 100x10        cancel  PASS
+Columns 4096x1000              normal  PASS
+Columns 4096x1000              wide    PASS
+Columns 4096x1000              cancel  PASS
+Rows 300x5000                  normal  PASS
+Rows 300x5000                  wide    PASS
+Rows 300x5000                  cancel  PASS
+LayerNorm-like rows 1024x1024  normal  PASS
+LayerNorm-like rows 1024x1024  wide    PASS
+LayerNorm-like rows 1024x1024  cancel  PASS
+Short odd rows 2000x13         normal  PASS
+Short odd rows 2000x13         wide    PASS
+Short odd rows 2000x13         cancel  PASS
+Rows 512x8191                  normal  PASS
+Rows 512x8191                  wide    PASS
+Rows 512x8191                  cancel  PASS
+Vector of 3,000,001            normal  PASS
+Vector of 3,000,001            wide    PASS
+Vector of 3,000,001            cancel  PASS
+Odd 7x3x13                     normal  PASS
+Odd 7x3x13                     wide    PASS
+Odd 7x3x13                     cancel  PASS
+Special cases                          PASS
+PASS: all shapes, distributions, chunk counts, orders, and special cases
+device: NVIDIA TITAN V
+shape                          method    median_ms      GB/s  distinct_bits max |float-exact| (ulps)
+vector 16M                     repro         0.216     310.4              1 0.0
+vector 16M                     float         0.150     447.0             19 15.0
+conv bias grad 256x64x56x56    repro         0.380     540.4              1 0.0
+conv bias grad 256x64x56x56    float         0.396     519.2             33 2023.0
+linear bias grad 8192x4096     repro         0.325     412.7              1 0.0
+linear bias grad 8192x4096     float         0.464     289.4              1 669651.0
+row sums 8192x4096             repro         0.258     520.3              1 0.0
+row sums 8192x4096             float         0.219     612.0              1 16271.0
+LayerNorm-like rows 16384x1024 repro         0.146     458.5              1 0.0
+LayerNorm-like rows 16384x1024 float         0.113     596.1              1 5719.0
+softmax-like rows 65536x128    repro         0.208     161.2              1 0.0
+softmax-like rows 65536x128    float         0.063     530.9              1 68224.0
+LeNet conv1 bias 100x6x28x28   repro         0.028      68.0              1 0.0
+LeNet conv1 bias 100x6x28x28   float         0.014     134.9             32 23.0
+LeNet softmax rows 100x10      repro         0.009       0.5              1 0.0
+LeNet softmax rows 100x10      float         0.009       0.4              1 6.0
+=== GPU 1: NVIDIA TITAN V ===
+Linear bias grad 100x120       normal  PASS
+Linear bias grad 100x120       wide    PASS
+Linear bias grad 100x120       cancel  PASS
+Linear bias grad 100x84        normal  PASS
+Linear bias grad 100x84        wide    PASS
+Linear bias grad 100x84        cancel  PASS
+Linear bias grad 100x10        normal  PASS
+Linear bias grad 100x10        wide    PASS
+Linear bias grad 100x10        cancel  PASS
+Conv1 bias grad 100x6x28x28    normal  PASS
+Conv1 bias grad 100x6x28x28    wide    PASS
+Conv1 bias grad 100x6x28x28    cancel  PASS
+Conv2 bias grad 100x16x10x10   normal  PASS
+Conv2 bias grad 100x16x10x10   wide    PASS
+Conv2 bias grad 100x16x10x10   cancel  PASS
+Loss over batch of 100         normal  PASS
+Loss over batch of 100         wide    PASS
+Loss over batch of 100         cancel  PASS
+Softmax row sums 100x10        normal  PASS
+Softmax row sums 100x10        wide    PASS
+Softmax row sums 100x10        cancel  PASS
+Columns 4096x1000              normal  PASS
+Columns 4096x1000              wide    PASS
+Columns 4096x1000              cancel  PASS
+Rows 300x5000                  normal  PASS
+Rows 300x5000                  wide    PASS
+Rows 300x5000                  cancel  PASS
+LayerNorm-like rows 1024x1024  normal  PASS
+LayerNorm-like rows 1024x1024  wide    PASS
+LayerNorm-like rows 1024x1024  cancel  PASS
+Short odd rows 2000x13         normal  PASS
+Short odd rows 2000x13         wide    PASS
+Short odd rows 2000x13         cancel  PASS
+Rows 512x8191                  normal  PASS
+Rows 512x8191                  wide    PASS
+Rows 512x8191                  cancel  PASS
+Vector of 3,000,001            normal  PASS
+Vector of 3,000,001            wide    PASS
+Vector of 3,000,001            cancel  PASS
+Odd 7x3x13                     normal  PASS
+Odd 7x3x13                     wide    PASS
+Odd 7x3x13                     cancel  PASS
+Special cases                          PASS
+PASS: all shapes, distributions, chunk counts, orders, and special cases
+device: NVIDIA TITAN V
+shape                          method    median_ms      GB/s  distinct_bits max |float-exact| (ulps)
+vector 16M                     repro         0.217     309.9              1 0.0
+vector 16M                     float         0.150     448.3             16 13.0
+conv bias grad 256x64x56x56    repro         0.380     541.5              1 0.0
+conv bias grad 256x64x56x56    float         0.396     518.7             33 2023.0
+linear bias grad 8192x4096     repro         0.317     423.2              1 0.0
+linear bias grad 8192x4096     float         0.444     302.5              1 669651.0
+row sums 8192x4096             repro         0.255     526.3              1 0.0
+row sums 8192x4096             float         0.218     615.0              1 16271.0
+LayerNorm-like rows 16384x1024 repro         0.145     464.0              1 0.0
+LayerNorm-like rows 16384x1024 float         0.113     596.3              1 5719.0
+softmax-like rows 65536x128    repro         0.202     166.0              1 0.0
+softmax-like rows 65536x128    float         0.063     533.4              1 68224.0
+LeNet conv1 bias 100x6x28x28   repro         0.025      74.8              1 0.0
+LeNet conv1 bias 100x6x28x28   float         0.013     146.3             32 19.0
+LeNet softmax rows 100x10      repro         0.008       0.5              1 0.0
+LeNet softmax rows 100x10      float         0.008       0.5              1 6.0
+OVERALL: PASS

@@ -28,7 +28,7 @@ Cross-entropy is in the same files. The loss is `repro_logf(S) - (x[t] - max)` p
 | `repro_expf` | `4ccc7cddaea06b26` | 0 |
 | `repro_logf` | `117fa2a6bbdea567` | 5 (Apple's double-based result rounds wrongly) |
 
-**GPU:** not run yet. `./run_softmax.sh` on each GPU, then `./compare_math.sh results/mac/cpu_repro.txt results/<host>/repro_gpu0_*.txt`.
+**GPU:** tests pass, and exp and log hashes over all 2³² inputs match the CPU, on RTX 2080 Ti and TITAN V (CUDA 12.4, 12.6; 2080 Ti also 13.0) and RTX 4070 (CUDA 12.4). To repeat: `./run_softmax.sh` on each GPU, then `./compare_math.sh results/mac/cpu_repro.txt results/<host>/repro_gpu0_*.txt`.
 
 To also compare with CORE-MATH: `CORE_MATH_DIR=<clone> ./run_check_math.sh`.
 
