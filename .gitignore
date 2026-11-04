@@ -4,3 +4,7 @@ results/
 *.o
 *.a
 .DS_Store
+data/
+*.so
+*.pyd
+__pycache__/
