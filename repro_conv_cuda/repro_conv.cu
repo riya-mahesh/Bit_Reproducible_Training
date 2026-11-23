@@ -1,4 +1,5 @@
 #include "repro_conv.cuh"
+#include "../repro_sum_cuda/repro_reduce.cuh"
 #include <cuda_runtime.h>
 #include <cstdint>
 
@@ -9,7 +10,7 @@ constexpr int THREADS = 256;
 constexpr size_t ALIGN = 256;
 size_t align_up(size_t x) { return (x + ALIGN - 1) / ALIGN * ALIGN; }
 
-// float32 magnitudes compare like their bits, so atomicMax on bits gives the largest |x|.
+// Finite float32 magnitudes compare like their bits, enabling an integer max reduction.
 __device__ __forceinline__ unsigned magnitude_bits(float x) { return __float_as_uint(x) & 0x7FFFFFFFu; }
 }
 
@@ -31,15 +32,12 @@ quantize_filters_kernel(const float* __restrict__ w, int* __restrict__ Wq, int* 
 // All weights with one scale, for the input gradient.
 __global__ void __launch_bounds__(THREADS)
 quantize_all_weights_kernel(const float* __restrict__ w, int* __restrict__ Wq, int* __restrict__ eW, int count, int S) {
-    __shared__ unsigned m;
+    __shared__ unsigned maxima[THREADS / 32];
     __shared__ int e;
     int t = threadIdx.x;
-    if (t == 0) m = 0u;
-    __syncthreads();
     unsigned local = 0u;
     for (int i = t; i < count; i += THREADS) local = max(local, magnitude_bits(w[i]));
-    atomicMax(&m, local);
-    __syncthreads();
+    unsigned m = repro_reduce::block_max(local, maxima);
     if (t == 0) { e = scale_exponent(__uint_as_float(m)); *eW = e; }
     __syncthreads();
     for (int i = t; i < count; i += THREADS) Wq[i] = fixed_point(w[i], e, S);
@@ -66,18 +64,15 @@ forward_kernel(const float* __restrict__ x, const int* __restrict__ Wq, const in
 // Block per filter: the scale of dY[:, f, :, :], read as whole images in memory order.
 __global__ void __launch_bounds__(THREADS)
 filter_scales_kernel(const float* __restrict__ dy, int* __restrict__ eF, ConvShape g) {
-    __shared__ unsigned m;
+    __shared__ unsigned maxima[THREADS / 32];
     int t = threadIdx.x, f = blockIdx.x;
     size_t per_filter = (size_t)g.OH() * g.OW();
-    if (t == 0) m = 0u;
-    __syncthreads();
     unsigned local = 0u;
     for (int n = 0; n < g.N; ++n) {
         const float* p = dy + ((size_t)n * g.F + f) * per_filter;
         for (size_t i = t; i < per_filter; i += THREADS) local = max(local, magnitude_bits(p[i]));
     }
-    atomicMax(&m, local);
-    __syncthreads();
+    unsigned m = repro_reduce::block_max(local, maxima);
     if (t == 0) eF[f] = scale_exponent(__uint_as_float(m));
 }
 
@@ -91,32 +86,35 @@ quantize_dy_per_filter_kernel(const float* __restrict__ dy, const int* __restric
 }
 
 // Block per position k. Each thread owns some window places (oy, ox) and handles them for all
-// images: one local maximum and one atomic per thread for the scale, then the exact sums for
-// every filter, merged in shared memory and rounded once.
+// images: reduce local maxima for the scale, then merge exact sums through one
+// shared slot per warp/filter and round once. No shared slot has multiple writers.
 template<int MAX_F>
 __global__ void __launch_bounds__(THREADS)
 weight_grad_kernel(const float* __restrict__ x, const int* __restrict__ D, const int* __restrict__ eF,
                    float* __restrict__ dw, ConvShape g, int S) {
-    __shared__ unsigned m;
-    __shared__ int64_t acc[MAX_F];
+    __shared__ unsigned maxima[THREADS / 32];
+    __shared__ int64_t partial[THREADS / 32][MAX_F];
     int t = threadIdx.x, k = blockIdx.x, ow = g.OW(), per = g.OH() * ow;
+    int lane = t & 31, warp = t >> 5;
     int c, ky, kx;
     position_of(g, k, c, ky, kx);
-    if (t == 0) m = 0u;
-    if (t < MAX_F) acc[t] = 0;
-    __syncthreads();
     unsigned local = 0u;
     for (int i = t; i < per; i += THREADS) local = max(local, position_max_bits(x, g, i / ow, i % ow, c, ky, kx));
-    atomicMax(&m, local);
-    __syncthreads();
+    unsigned m = repro_reduce::block_max(local, maxima);
     int eX = scale_exponent(__uint_as_float(m));
     int64_t s[MAX_F];
     for (int f = 0; f < g.F; ++f) s[f] = 0;
     for (int i = t; i < per; i += THREADS) weight_grad_windows(x, D, g, i / ow, i % ow, c, ky, kx, eX, S, s);
-    for (int f = 0; f < g.F; ++f)
-        atomicAdd(reinterpret_cast<unsigned long long*>(&acc[f]), (unsigned long long)s[f]);
+    for (int f = 0; f < g.F; ++f) {
+        int64_t v = repro_reduce::warp_sum(s[f]);
+        if (lane == 0) partial[warp][f] = v;
+    }
     __syncthreads();
-    if (t < g.F) dw[(size_t)t * g.K() + k] = round_to_float(acc[t], eF[t] + eX - 14 * (S - 1));
+    if (t < g.F) {
+        int64_t v = 0;
+        for (int w = 0; w < THREADS / 32; ++w) v += partial[w][t];
+        dw[(size_t)t * g.K() + k] = round_to_float(v, eF[t] + eX - 14 * (S - 1));
+    }
 }
 
 // ---------------- input gradient ----------------
@@ -124,17 +122,14 @@ weight_grad_kernel(const float* __restrict__ x, const int* __restrict__ D, const
 // Block per image: one scale for its dY, then its integers.
 __global__ void __launch_bounds__(THREADS)
 quantize_dy_per_image_kernel(const float* __restrict__ dy, int* __restrict__ D, int* __restrict__ eI, ConvShape g, int S) {
-    __shared__ unsigned m;
+    __shared__ unsigned maxima[THREADS / 32];
     __shared__ int e;
     int t = threadIdx.x, n = blockIdx.x;
     size_t per = (size_t)g.F * g.OH() * g.OW();
     const float* p = dy + (size_t)n * per;
-    if (t == 0) m = 0u;
-    __syncthreads();
     unsigned local = 0u;
     for (size_t i = t; i < per; i += THREADS) local = max(local, magnitude_bits(p[i]));
-    atomicMax(&m, local);
-    __syncthreads();
+    unsigned m = repro_reduce::block_max(local, maxima);
     if (t == 0) { e = scale_exponent(__uint_as_float(m)); eI[n] = e; }
     __syncthreads();
     for (size_t i = t; i < per; i += THREADS) D[(size_t)n * per + i] = fixed_point(p[i], e, S);

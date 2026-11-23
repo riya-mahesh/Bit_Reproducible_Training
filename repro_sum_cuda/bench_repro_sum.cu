@@ -1,6 +1,6 @@
 // Benchmark: repro_sum vs an ordinary float reduction using the same layout
 // strategy: warp per row for row sums, thread per column for column sums, and
-// per-block tree + atomicAdd (the usual GPU pattern) otherwise. Reports median time, effective bandwidth, whether each
+// per-block tree + ordered partial reduction otherwise. Reports median time, effective bandwidth, whether each
 // method gives the same bits on every run, and how far the float result is from
 // the exactly rounded one.
 // Usage: bench_repro_sum [iters]
@@ -19,7 +19,7 @@ static void ck(cudaError_t e, const char* w) {
     if (e != cudaSuccess) { std::fprintf(stderr, "%s: %s\n", w, cudaGetErrorString(e)); std::exit(1); }
 }
 
-// Baseline: each block reduces a slice of output b's elements in float, then atomicAdd.
+// Baseline: each block owns one FP32 partial; a second kernel merges partials.
 __global__ void float_sum_kernel(const float* x, float* out, int A, int B, int C, int chunks) {
     __shared__ float sh[256];
     int t = threadIdx.x, b = blockIdx.x, chunk = blockIdx.y;
@@ -30,7 +30,15 @@ __global__ void float_sum_kernel(const float* x, float* out, int A, int B, int C
     sh[t] = s;
     __syncthreads();
     for (int k = 128; k > 0; k >>= 1) { if (t < k) sh[t] += sh[t + k]; __syncthreads(); }
-    if (t == 0) atomicAdd(&out[b], sh[0]);
+    if (t == 0) out[(size_t)b * chunks + chunk] = sh[0];
+}
+
+__global__ void float_merge_kernel(const float* partial, float* out, int B, int chunks) {
+    int b = blockIdx.x * blockDim.x + threadIdx.x;
+    if (b >= B) return;
+    float s = 0.0f;
+    for (int c = 0; c < chunks; ++c) s += partial[(size_t)b * chunks + c];
+    out[b] = s;
 }
 
 // Baseline for rows: one warp per row, shuffle tree (deterministic on one GPU).
@@ -87,6 +95,8 @@ int main(int argc, char** argv) {
         void* ws;
         ck(cudaMalloc(&ws, plan.workspace_bytes), "ws");
         int fchunks = std::max(1, std::min(4 * prop.multiProcessorCount / s.B + 1, s.A * s.C / 4096 + 1));
+        float* fpartial;
+        ck(cudaMalloc(&fpartial, (size_t)s.B * fchunks * sizeof(float)), "float partials");
         std::vector<float> exact(s.B), got(s.B);
 
         for (int method = 0; method < 2; ++method) {
@@ -103,8 +113,8 @@ int main(int argc, char** argv) {
                     } else if (s.A == 1 && s.C <= 8192 && s.B >= 256) {
                         float_rows_kernel<<<(s.B + 7) / 8, 256>>>(dx, dout, s.B, s.C);
                     } else {
-                        ck(cudaMemsetAsync(dout, 0, (size_t)s.B * 4), "zero");
-                        float_sum_kernel<<<dim3(s.B, fchunks), 256>>>(dx, dout, s.A, s.B, s.C, fchunks);
+                        float_sum_kernel<<<dim3(s.B, fchunks), 256>>>(dx, fpartial, s.A, s.B, s.C, fchunks);
+                        float_merge_kernel<<<(s.B + 255) / 256, 256>>>(fpartial, dout, s.B, fchunks);
                     }
                 }
                 ck(cudaEventRecord(e1), "rec");
@@ -127,7 +137,7 @@ int main(int argc, char** argv) {
             std::printf("%-30s %-8s %10.3f %9.1f %14zu %.1f\n", s.name, method == 0 ? "repro" : "float",
                         med, n * 4 / (med * 1e6), distinct.size(), max_ulps);
         }
-        cudaFree(dx); cudaFree(dout); cudaFree(ws);
+        cudaFree(dx); cudaFree(dout); cudaFree(ws); cudaFree(fpartial);
     }
     return 0;
 }

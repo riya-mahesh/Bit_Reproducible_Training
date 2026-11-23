@@ -2,6 +2,7 @@
 #include "repro_softmax_math.cuh"
 #include "repro_sum.cuh"
 #include "repro_sum_fast.cuh"
+#include "repro_reduce.cuh"
 #include <cuda_runtime.h>
 #include <cstdint>
 
@@ -80,21 +81,33 @@ __global__ void __launch_bounds__(SM_THREADS)
 ce_mean_kernel(const float* __restrict__ loss, const int* __restrict__ target, float* __restrict__ out,
                int* __restrict__ count_out, int ignore_index, int rows, int cols) {
     __shared__ int64_t acc[repro_sum::LIMBS];
-    __shared__ int count, nf;
-    int t = threadIdx.x;
-    if (t < repro_sum::LIMBS) acc[t] = 0;
-    if (t == 0) count = nf = 0;
-    __syncthreads();
+    __shared__ int64_t partial[SM_WARPS][repro_sum::LIMBS];
+    __shared__ int counts[SM_WARPS], nonfinite[SM_WARPS];
+    int t = threadIdx.x, lane = t & 31, warp = t >> 5;
+    int64_t local[repro_sum::LIMBS] = {};
+    int count = 0, nf = 0;
     for (int r = t; r < rows; r += SM_THREADS) {
-        if (ce_row_kind(target[r], ignore_index, cols) != 0) atomicAdd(&count, 1);
-        int idx;
-        int64_t lo, hi;
-        if (!repro_sum::split_float(loss[r], idx, lo, hi)) { atomicOr(&nf, 1); continue; }
-        atomicAdd(reinterpret_cast<unsigned long long*>(&acc[idx]), (unsigned long long)lo);
-        atomicAdd(reinterpret_cast<unsigned long long*>(&acc[idx + 1]), (unsigned long long)hi);
+        count += ce_row_kind(target[r], ignore_index, cols) != 0;
+        repro_sum::acc_add(local, 1, loss[r], nf);
+    }
+#pragma unroll
+    for (int l = 0; l < repro_sum::LIMBS; ++l) {
+        int64_t v = repro_sum::warp_sum(local[l]);
+        if (lane == 0) partial[warp][l] = v;
+    }
+    count = repro_reduce::warp_sum(count);
+    nf = __any_sync(0xFFFFFFFFu, nf);
+    if (lane == 0) { counts[warp] = count; nonfinite[warp] = nf; }
+    __syncthreads();
+    if (t < repro_sum::LIMBS) {
+        int64_t v = 0;
+        for (int w = 0; w < SM_WARPS; ++w) v += partial[w][t];
+        acc[t] = v;
     }
     __syncthreads();
     if (t == 0) {
+        count = nf = 0;
+        for (int w = 0; w < SM_WARPS; ++w) { count += counts[w]; nf |= nonfinite[w]; }
         *count_out = count;
         *out = count == 0 ? canonical_nan() : repro_sum::finalize(acc, 1, (uint32_t)count, nf);
     }
@@ -125,8 +138,7 @@ __device__ __forceinline__ float row_exp_and_sum(const float* p, float* o, int c
         float other = __shfl_xor_sync(0xFFFFFFFFu, m, k);
         if (other > m) m = other;
     }
-    if (lane < repro_sum::LIMBS) full[lane] = 0;
-    __syncwarp();
+    int64_t local[repro_sum::LIMBS] = {};
     // The largest entry gives exp = 1, so nearly every value lands in the window around it.
     const int low = repro_sum::window_low_for(126);
     repro_sum::FastAcc s;
@@ -135,17 +147,17 @@ __device__ __forceinline__ float row_exp_and_sum(const float* p, float* o, int c
     for (int c = lane; c < cols; c += 32) {
         float e = repro_expf(fsub(p[c], m));
         o[c] = e;
-        repro_sum::fast_add<true>(s, low, e, full, nf);
+        repro_sum::fast_add(s, low, e, local, nf);
     }
-    repro_sum::fast_fold(s);
-    int64_t r0 = repro_sum::warp_sum(s.r[0]), r1 = repro_sum::warp_sum(s.r[1]), r2 = repro_sum::warp_sum(s.r[2]);
+    repro_sum::fast_finish(s, low, local);
+#pragma unroll
+    for (int l = 0; l < repro_sum::LIMBS; ++l) {
+        int64_t v = repro_sum::warp_sum(local[l]);
+        if (lane == 0) full[l] = v;
+    }
     nf = __any_sync(0xFFFFFFFFu, nf);
-    __syncwarp();                                    // spills into full are complete
     float S = 0.0f;
     if (lane == 0) {
-        full[low] += r0;
-        full[low + 1] += r1;
-        full[low + 2] += r2;
         S = repro_sum::finalize(full, 1, 1u, nf);
     }
     return __shfl_sync(0xFFFFFFFFu, S, 0);

@@ -8,6 +8,8 @@ Ordinary GPU kernels are not bit-reproducible because they add floating-point nu
 
 **To run the experiments** (reproducibility, accuracy, speed), see [`experiments/README.md`](experiments/README.md).
 
+**To understand the code and improvement opportunities**, see [`CODE_WALKTHROUGH.md`](CODE_WALKTHROUGH.md) for the training flow, arithmetic definitions, review findings, and suggested next steps.
+
 ## Components
 
 | Folder | What it is | Status |

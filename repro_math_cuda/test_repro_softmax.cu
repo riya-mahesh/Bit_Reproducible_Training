@@ -189,15 +189,21 @@ int main() {
     }
 
     // Cross-entropy at the shapes training uses, including ignored rows and row order.
-    const struct { const char* name; int rows, cols; float scale; int ignored; } ce[] = {
+    const struct { const char* name; int rows, cols; float scale; int ignored; bool nonfinite; } ce[] = {
         {"MNIST 100x10", 100, 10, 5.0f, 0},
         {"GPT-2 8x50257, 3 rows ignored (staged)", 8, 50257, 8.0f, 3},
         {"GPT-2 256x50257, 3 rows ignored (fused)", 256, 50257, 8.0f, 3},
         {"short rows 2000x3, 500 rows ignored", 2000, 3, 2.0f, 500},
         {"large gaps 300x257", 300, 257, 60.0f, 0},
+        {"all rows ignored", 100, 10, 5.0f, 100},
+        {"nonfinite losses in late warps", 777, 10, 5.0f, 3, true},
     };
     for (auto& c : ce) {
         auto x = normal((size_t)c.rows * c.cols, c.scale, g);
+        if (c.nonfinite) {
+            x[x.size() - 1] = NAN;
+            x[(size_t)(c.rows / 2) * c.cols] = INFINITY;
+        }
         std::vector<int> tg(c.rows);
         for (auto& t : tg) t = (int)(g() % (uint64_t)c.cols);
         for (int i = 0; i < c.ignored; ++i) tg[i] = -100;

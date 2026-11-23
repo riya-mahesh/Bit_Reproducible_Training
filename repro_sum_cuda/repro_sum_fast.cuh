@@ -1,7 +1,9 @@
 #pragma once
 // Device-side fast exact accumulation, used by repro_sum.cu and repro_softmax.cu.
 #include "repro_sum_math.cuh"
+#if defined(__CUDACC__)
 #include <cuda_runtime.h>
+#endif
 #include <cstdint>
 
 namespace repro_sum {
@@ -37,13 +39,13 @@ struct FastAcc {
     int n;            // adds since the last fold
 };
 
-__device__ __forceinline__ void fast_init(FastAcc& s) {
+__host__ __device__ inline void fast_init(FastAcc& s) {
     s.a0 = s.a1 = 0;
     s.r[0] = s.r[1] = s.r[2] = 0;
     s.n = 0;
 }
 
-__device__ __forceinline__ void fast_fold(FastAcc& s) {
+__host__ __device__ inline void fast_fold(FastAcc& s) {
     s.r[0] += (int64_t)(uint32_t)s.a0;
     s.r[1] += s.a0 >> 32;            // arithmetic shift: a0 = low32 + (a0 >> 32) * 2^32 exactly
     s.r[1] += (int64_t)(uint32_t)s.a1;
@@ -54,23 +56,22 @@ __device__ __forceinline__ void fast_fold(FastAcc& s) {
 
 // Window base for values whose shift is around sh: keeps about 16 bits of headroom
 // above sh and 16-48 bits below it in the fast path.
-__device__ __forceinline__ int window_low_for(int sh) {
+__host__ __device__ inline int window_low_for(int sh) {
     int low = ((sh + 16) >> 5) - 1;
     return low < 0 ? 0 : (low > LIMBS - 3 ? LIMBS - 3 : low);
 }
 
 // Shift of a nonzero finite value (x = m * 2^(sh-149)), or -1 for zero/NaN/Inf.
-__device__ __forceinline__ int value_shift(float x) {
-    uint32_t b = __float_as_uint(x);
+__host__ __device__ inline int value_shift(float x) {
+    uint32_t b = float_bits(x);
     uint32_t e = (b >> 23) & 0xFFu;
     if (e == 0xFFu || (b & 0x7FFFFFFFu) == 0) return -1;
     return e ? (int)e - 1 : 0;
 }
 
-// Adds x. full: 10-limb overflow accumulator (shared memory if SHARED, else private).
-template<bool SHARED>
-__device__ __forceinline__ void fast_add(FastAcc& s, int low, float x, int64_t* full, int& nf) {
-    uint32_t b = __float_as_uint(x);
+// Adds x. full is a private 10-limb spill accumulator owned by this thread.
+__host__ __device__ inline void fast_add(FastAcc& s, int low, float x, int64_t* full, int& nf) {
+    uint32_t b = float_bits(x);
     uint32_t e = (b >> 23) & 0xFFu;
     if (e == 0xFFu) { nf = 1; return; }
     uint32_t f = b & 0x7FFFFFu;
@@ -86,17 +87,20 @@ __device__ __forceinline__ void fast_add(FastAcc& s, int low, float x, int64_t* 
     } else if (v) {
         int idx = sh >> 5;
         int64_t lo = (int64_t)(uint32_t)v, hi = v >> 32;
-        if (SHARED) {
-            atomicAdd(reinterpret_cast<unsigned long long*>(&full[idx]), (unsigned long long)lo);
-            atomicAdd(reinterpret_cast<unsigned long long*>(&full[idx + 1]), (unsigned long long)hi);
-        } else {
-            full[idx] += lo;
-            full[idx + 1] += hi;
-        }
+        full[idx] += lo;
+        full[idx + 1] += hi;
     }
     if (++s.n == FOLD_EVERY) fast_fold(s);
 }
 
+// Fold the fast window into this thread's private full accumulator.
+__host__ __device__ inline void fast_finish(FastAcc& s, int low, int64_t* full) {
+    fast_fold(s);
+#pragma unroll
+    for (int k = 0; k < 3; ++k) full[low + k] += s.r[k];
+}
+
+#if defined(__CUDACC__)
 __device__ __forceinline__ int64_t warp_sum(int64_t v) {
 #pragma unroll
     for (int o = 16; o > 0; o >>= 1) v += __shfl_down_sync(0xFFFFFFFFu, v, o);
@@ -111,23 +115,23 @@ __device__ __forceinline__ int warp_max(int v) {
 
 // Adds a contiguous segment p[0, len) using `lanes` cooperating threads with id `t`:
 // scalar head up to 16-byte alignment, float4 body, scalar tail.
-template<bool SHARED>
 __device__ __forceinline__ void fast_segment(FastAcc& s, int low, const float* p, int len, int t, int lanes,
                                             int64_t* full, int& nf) {
     int head = (int)((4 - ((reinterpret_cast<uintptr_t>(p) >> 2) & 3)) & 3);
     if (head > len) head = len;
-    if (t < head) fast_add<SHARED>(s, low, p[t], full, nf);
+    if (t < head) fast_add(s, low, p[t], full, nf);
     int nvec = (len - head) >> 2;
     const float4* pv = reinterpret_cast<const float4*>(p + head);
     for (int j = t; j < nvec; j += lanes) {
         float4 v = pv[j];
-        fast_add<SHARED>(s, low, v.x, full, nf);
-        fast_add<SHARED>(s, low, v.y, full, nf);
-        fast_add<SHARED>(s, low, v.z, full, nf);
-        fast_add<SHARED>(s, low, v.w, full, nf);
+        fast_add(s, low, v.x, full, nf);
+        fast_add(s, low, v.y, full, nf);
+        fast_add(s, low, v.z, full, nf);
+        fast_add(s, low, v.w, full, nf);
     }
     int done = head + (nvec << 2);
-    if (t < len - done) fast_add<SHARED>(s, low, p[done + t], full, nf);
+    if (t < len - done) fast_add(s, low, p[done + t], full, nf);
 }
 
+#endif // __CUDACC__
 } // namespace repro_sum
