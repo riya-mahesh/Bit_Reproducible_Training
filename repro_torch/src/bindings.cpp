@@ -14,7 +14,7 @@
 #include "repro_softmax.cuh"
 #include "repro_sum.cuh"
 #include <cuda_runtime.h>
-cudaError_t repro_scan_finite(const float* x, int* flag, size_t n, int op_id);
+#include "repro_scan.cuh"
 #endif
 #include <functional>
 #include <stdexcept>
@@ -288,7 +288,10 @@ void scan_finite(Tensor x, Tensor flag, int op_id) {
     x = x.contiguous();
     if (x.is_cuda()) {
 #ifndef REPRO_CPU_ONLY
-        ck(repro_scan_finite(x.data_ptr<float>(), flag.data_ptr<int>(), (size_t)x.numel(), op_id), "finite scan");
+        size_t n = (size_t)x.numel();
+        Tensor ws = workspace(repro_scan_workspace_bytes(n), x);
+        ck(repro_scan_finite(x.data_ptr<float>(), flag.data_ptr<int>(), n, op_id,
+                             reinterpret_cast<int*>(ws.data_ptr<uint8_t>())), "finite scan");
         return;
 #endif
     }

@@ -131,6 +131,7 @@ int main() {
     check("stride 2, padding 1, non-square", shape(4, 3, 17, 23, 8, 3, 5, 2, 2, 1, 1), 3, rng);
     check("stride (3,1)", shape(2, 2, 19, 11, 5, 4, 3, 3, 1, 0, 2), 3, rng);
     check("many filters", shape(2, 4, 12, 12, 100, 3, 3, 1, 1, 1, 1), 3, rng);
+    check("maximum filters, short spatial reduction, S=2", shape(2, 1, 5, 7, 256, 3, 3, 1, 1, 0, 0), 2, rng);
     std::printf("%s\n", failures ? "OVERALL: FAIL" : "OVERALL: PASS");
     return failures ? 1 : 0;
 }

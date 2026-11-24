@@ -142,6 +142,23 @@ int main() {
     expect(one({1.0f, 2.0f, 4.0f}, true) == 7.0f / 3.0f, "mean 7/3 correctly rounded");
     std::printf("%-30s %-7s %s\n", "Special cases", "", failures == before ? "PASS" : "FAIL");
 
+    // Nonfinite flags must survive every warp/block merge, including late lanes
+    // and partially occupied rows. Exercise all three layout strategies.
+    for (const Shape& s : {Shape{"rows", 1, 300, 257}, Shape{"general", 3, 7, 79},
+                           Shape{"columns", 263, 17, 1}}) {
+        std::vector<float> x((size_t)s.A * s.B * s.C, 1.0f);
+        for (int b = 0; b < s.B; ++b) {
+            size_t last = ((size_t)(s.A - 1) * s.B + b) * s.C + s.C - 1;
+            if (b % 3 == 0) x[last] = NAN;
+            if (b % 3 == 1) x[last] = -INFINITY;
+        }
+        for (bool mean : {false, true}) for (int chunks : {0, 1, 3}) {
+            SumConfig cfg; cfg.mean = mean; cfg.chunks = chunks;
+            expect(same_bits(gpu_sum(x, s.A, s.B, s.C, cfg), cpu_sum(x, s.A, s.B, s.C, mean)),
+                   std::string("nonfinite merge: ") + s.name);
+        }
+    }
+
     if (failures) { std::printf("FAILED: %d checks\n", failures); return 2; }
     std::puts("PASS: all shapes, distributions, chunk counts, orders, and special cases");
     return 0;

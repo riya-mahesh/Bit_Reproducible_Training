@@ -162,8 +162,8 @@ __global__ void __launch_bounds__(THREADS) run_kernel(unsigned long long* block_
         for (int k = 1; k < THREADS / 32; ++k) { sh[0] += sh[k]; sn[0] += sn[k]; sm[0] += sm[k]; su[0] = max(su[0], su[k]); }
         block_hash[blockIdx.x] = sh[0];
         block_hash_nan[blockIdx.x] = sn[0];
-        atomicAdd(&stats->mismatches, sm[0]);
-        atomicMax(&stats->max_ulp, su[0]);
+        stats[blockIdx.x].mismatches = sm[0];
+        stats[blockIdx.x].max_ulp = su[0];
     }
 }
 
@@ -276,17 +276,21 @@ int main(int argc, char** argv) {
     Stats* d_stats;
     CK(cudaMalloc(&d_hash, sizeof(unsigned long long) * NBLOCKS));
     CK(cudaMalloc(&d_hash_nan, sizeof(unsigned long long) * NBLOCKS));
-    CK(cudaMalloc(&d_stats, sizeof(Stats)));
+    CK(cudaMalloc(&d_stats, sizeof(Stats) * NBLOCKS));
+    std::vector<Stats> block_stats(NBLOCKS);
     std::vector<unsigned long long> hash(NBLOCKS), hash_nan(NBLOCKS);
     for (int f : funcs) {
-        CK(cudaMemset(d_stats, 0, sizeof(Stats)));
         dispatch(f, d_hash, d_hash_nan, d_stats);
         CK(cudaGetLastError());
         CK(cudaDeviceSynchronize());
-        Stats st;
+        Stats st{};
         CK(cudaMemcpy(hash.data(), d_hash, sizeof(unsigned long long) * NBLOCKS, cudaMemcpyDeviceToHost));
         CK(cudaMemcpy(hash_nan.data(), d_hash_nan, sizeof(unsigned long long) * NBLOCKS, cudaMemcpyDeviceToHost));
-        CK(cudaMemcpy(&st, d_stats, sizeof(Stats), cudaMemcpyDeviceToHost));
+        CK(cudaMemcpy(block_stats.data(), d_stats, sizeof(Stats) * NBLOCKS, cudaMemcpyDeviceToHost));
+        for (const Stats& part : block_stats) {
+            st.mismatches += part.mismatches;
+            if (part.max_ulp > st.max_ulp) st.max_ulp = part.max_ulp;
+        }
         unsigned long long total = 0, total_nan = 0;
         for (int k = 0; k < NBLOCKS; ++k) {
             total += hash[k];

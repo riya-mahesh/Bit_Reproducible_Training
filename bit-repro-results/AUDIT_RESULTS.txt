@@ -1,0 +1,42 @@
+BIT-REPRO RESULTS AUDIT
+
+Archives: 4; configurations: 7; full training records: 280.
+Independent checks: PASS.
+All four source snapshots match each other and their manifests; each has 35 CUDA files with no explicit atomic call candidates.
+Repro: 112 records, 9 seed/batch groups; all five output/init hashes and logged loss bit sequences agree within each matching group.
+RepDL: 56 records, 5 seed groups; all five hashes and logged loss bits agree within each group.
+Stock: output hashes differ across runs/configurations; see audit_summary.json for group counts.
+Atomic A100 comparison: 16 matching old repro records checked against the new runs; all match: True.
+
+TIMING: median across the three seed-0 batch-100 unprofiled runs of each run's median step time (ms).
+Config              Repro      RepDL      Stock    RepDL/Repro   GPU0 processes at initial snapshot
+cuda2/cuda124          3.595     17.741      2.711         4.94   none recorded
+cuda2/cuda126          3.456     18.122      2.760         5.24   ['4060650']
+cuda3/cuda124          3.252     14.861      2.046         4.57   ['1305661']
+cuda3/cuda126          3.201     14.624      2.028         4.57   none recorded
+cuda5/cuda124         11.555     14.285      9.021         1.24   none recorded
+cuda5/cuda126         11.586     24.211      8.851         2.09   none recorded
+cuda5/cuda130         11.597     26.135      9.199         2.25   none recorded
+
+Contention: cuda2/cuda126 and cuda3/cuda124 have another process on GPU0 at the initial snapshot. Treat performance as potentially contaminated; repeat on an idle/reserved GPU before claiming clean speedups.
+An empty process list at startup does not prove an entire run remained uncontended.
+
+ACCURACY: one unprofiled result per seed 0..4 (seed 0 uses baseline repeat 1), batch 100.
+cuda2/cuda124 repro: 98.002% mean, repdl: 97.960% mean, stock: 97.820% mean
+cuda2/cuda126 repro: 98.002% mean, repdl: 97.960% mean, stock: 97.968% mean
+cuda3/cuda124 repro: 98.002% mean, repdl: 97.960% mean, stock: 98.010% mean
+cuda3/cuda126 repro: 98.002% mean, repdl: 97.960% mean, stock: 97.962% mean
+cuda5/cuda124 repro: 98.002% mean, repdl: 97.960% mean, stock: 97.890% mean
+cuda5/cuda126 repro: 98.002% mean, repdl: 97.960% mean, stock: 98.068% mean
+cuda5/cuda130 repro: 98.002% mean, repdl: 97.960% mean, stock: 98.030% mean
+
+Seven configurations, 40 training runs and two Nsight reports each: 280 training records and 14 reports.
+The Nsight captures cover weight-gradient kernels at batches 100 and 500 only; broad conv/GEMM and optimizer samples are not in these reruns.
+
+Profiler binaries were read/checksummed through the archives; no local Nsight binary parser was run. Text exports were checked for two weight-gradient kernels each.
+GPU process records are point-in-time observations, not continuous monitoring.
+Source scan checks explicit atomic calls in project CUDA files, not generated SASS or PyTorch/RepDL internals.
+Cross-version comparisons change PyTorch along with CUDA.
+This validates the tested MNIST configurations, not every FP32 input or launch geometry.
+
+Full numbers, archive checksums, stage times, batch scaling and hash counts: audit_summary.json.

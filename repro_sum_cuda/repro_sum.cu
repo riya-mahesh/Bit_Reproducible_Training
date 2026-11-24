@@ -16,7 +16,7 @@ sum_rows_kernel(const float* __restrict__ x, float* __restrict__ out, int rows, 
     int lane = threadIdx.x & 31, w = threadIdx.x >> 5;
     int row = blockIdx.x * WARPS + w;
     if (row >= rows) return;                         // whole warp exits together
-    if (lane < LIMBS) full[w][lane] = 0;
+    int64_t local[LIMBS] = {};
     const float* p = x + (size_t)row * C;
     int low = warp_max(lane < C ? value_shift(p[lane]) : -1);
     low = low < 0 ? DEFAULT_LOW : window_low_for(low);
@@ -24,15 +24,15 @@ sum_rows_kernel(const float* __restrict__ x, float* __restrict__ out, int rows, 
     FastAcc s;
     fast_init(s);
     int nf = 0;
-    fast_segment<true>(s, low, p, C, lane, 32, full[w], nf);
-    fast_fold(s);
-    int64_t r0 = warp_sum(s.r[0]), r1 = warp_sum(s.r[1]), r2 = warp_sum(s.r[2]);
+    fast_segment(s, low, p, C, lane, 32, local, nf);
+    fast_finish(s, low, local);
+#pragma unroll
+    for (int l = 0; l < LIMBS; ++l) {
+        int64_t v = warp_sum(local[l]);
+        if (lane == 0) full[w][l] = v;
+    }
     nf = __any_sync(0xFFFFFFFFu, nf);
-    __syncwarp();                                    // spills into full[w] are complete
     if (lane == 0) {
-        full[w][low] += r0;
-        full[w][low + 1] += r1;
-        full[w][low + 2] += r2;
         out[row] = finalize(full[w], 1, divisor, nf);
     }
 }
@@ -47,15 +47,15 @@ __global__ void __launch_bounds__(THREADS)
 sum_general_kernel(const float* __restrict__ x, int64_t* __restrict__ part, int* __restrict__ part_nf,
                    float* __restrict__ out, int A, int B, int C, int chunks, uint32_t divisor) {
     __shared__ int64_t full[LIMBS];
-    __shared__ int64_t wsum[WARPS][3];
-    __shared__ int low_sh, nf_sh;
+    __shared__ int64_t wsum[WARPS][LIMBS];
+    __shared__ int warp_nf[WARPS];
+    __shared__ int low_sh;
+    int64_t local[LIMBS] = {};
     int t = threadIdx.x, lane = t & 31, warp = t >> 5;
     int b = blockIdx.x, chunk = blockIdx.y;
     int count = A * C;
     int i0 = (int)(((int64_t)count * chunk) / chunks);
     int i1 = (int)(((int64_t)count * (chunk + 1)) / chunks);
-    if (t < LIMBS) full[t] = 0;
-    if (t == 0) nf_sh = 0;
     if (warp == 0) {
         int sh = -1;
         if (i0 + lane < i1) {
@@ -75,7 +75,7 @@ sum_general_kernel(const float* __restrict__ x, int64_t* __restrict__ part, int*
         int a = i0 / C, c = i0 - a * C, left = i1 - i0;
         while (left > 0) {
             int len = min(C - c, left);
-            fast_segment<true>(s, low, x + ((size_t)a * B + b) * C + c, len, t, THREADS, full, nf);
+            fast_segment(s, low, x + ((size_t)a * B + b) * C + c, len, t, THREADS, local, nf);
             left -= len;
             ++a;
             c = 0;
@@ -83,22 +83,25 @@ sum_general_kernel(const float* __restrict__ x, int64_t* __restrict__ part, int*
     } else {
         for (int i = i0 + t; i < i1; i += THREADS) {
             int a = i / C, c = i - a * C;
-            fast_add<true>(s, low, x[((size_t)a * B + b) * C + c], full, nf);
+            fast_add(s, low, x[((size_t)a * B + b) * C + c], local, nf);
         }
     }
-    fast_fold(s);
+    fast_finish(s, low, local);
 #pragma unroll
-    for (int k = 0; k < 3; ++k) {
-        int64_t v = warp_sum(s.r[k]);
+    for (int k = 0; k < LIMBS; ++k) {
+        int64_t v = warp_sum(local[k]);
         if (lane == 0) wsum[warp][k] = v;
     }
-    if (nf) nf_sh = 1;
+    nf = __any_sync(0xFFFFFFFFu, nf);
+    if (lane == 0) warp_nf[warp] = nf;
     __syncthreads();
-    if (t < 3) {
+    if (t < LIMBS) {
         int64_t v = 0;
         for (int k = 0; k < WARPS; ++k) v += wsum[k][t];
-        full[low + t] += v;   // spills are complete (barrier above); limb low+t is ours alone
+        full[t] = v;
     }
+    int nf_sh = 0;
+    if (t == 0) for (int w = 0; w < WARPS; ++w) nf_sh |= warp_nf[w];
     __syncthreads();
     if (chunks == 1) {
         if (t == 0) out[b] = finalize(full, 1, divisor, nf_sh);
@@ -135,12 +138,12 @@ sum_columns_kernel(const float* __restrict__ x, int64_t* __restrict__ part, int*
     for (; a + 4 <= a1; a += 4) {
         float v0 = x[(size_t)a * B + b], v1 = x[(size_t)(a + 1) * B + b];
         float v2 = x[(size_t)(a + 2) * B + b], v3 = x[(size_t)(a + 3) * B + b];
-        fast_add<false>(s, low, v0, full, nf);
-        fast_add<false>(s, low, v1, full, nf);
-        fast_add<false>(s, low, v2, full, nf);
-        fast_add<false>(s, low, v3, full, nf);
+        fast_add(s, low, v0, full, nf);
+        fast_add(s, low, v1, full, nf);
+        fast_add(s, low, v2, full, nf);
+        fast_add(s, low, v3, full, nf);
     }
-    for (; a < a1; ++a) fast_add<false>(s, low, x[(size_t)a * B + b], full, nf);
+    for (; a < a1; ++a) fast_add(s, low, x[(size_t)a * B + b], full, nf);
     fast_fold(s);
     full[low] += s.r[0];
     full[low + 1] += s.r[1];

@@ -165,7 +165,14 @@ __global__ void base_general(const float* x, float* out, int A, int B, int C, in
     sh[t] = s;
     __syncthreads();
     for (int k = 128; k > 0; k >>= 1) { if (t < k) sh[t] += sh[t + k]; __syncthreads(); }
-    if (t == 0) atomicAdd(&out[b], sh[0]);
+    if (t == 0) out[(size_t)b * chunks + chunk] = sh[0];
+}
+__global__ void base_merge(const float* partial, float* out, int B, int chunks) {
+    int b = blockIdx.x * blockDim.x + threadIdx.x;
+    if (b >= B) return;
+    float s = 0.0f;
+    for (int c = 0; c < chunks; ++c) s += partial[(size_t)b * chunks + c];
+    out[b] = s;
 }
 #endif
 
@@ -260,12 +267,17 @@ static Op make_sum(Ctx& ctx, const std::string& name, int A, int B, int C, bool 
         int sms = 0;
         cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0);
         int chunks = std::max(1, std::min(4 * sms / B + 1, A * C / 4096 + 1));
+        float* partial = nullptr;
+        if (C != 1 && !(A == 1 && C <= 8192 && B >= 256)) {
+            ck(cudaMalloc(&partial, (size_t)B * chunks * sizeof(float)), "baseline partials");
+            ctx.to_free.push_back(partial);
+        }
         op.base = [=](const std::vector<float*>& in, float* out, cudaStream_t st) {
             if (C == 1) base_columns<<<(B + 255) / 256, 256, 0, st>>>(in[0], out, A, B);
             else if (A == 1 && C <= 8192 && B >= 256) base_rows<<<(B + 7) / 8, 256, 0, st>>>(in[0], out, B, C);
             else {
-                cudaMemsetAsync(out, 0, (size_t)B * 4, st);
-                base_general<<<dim3(B, chunks), 256, 0, st>>>(in[0], out, A, B, C, chunks);
+                base_general<<<dim3(B, chunks), 256, 0, st>>>(in[0], partial, A, B, C, chunks);
+                base_merge<<<(B + 255) / 256, 256, 0, st>>>(partial, out, B, chunks);
             }
             // (mean: the baseline would also divide; omitted, it only affects timing negligibly)
         };
