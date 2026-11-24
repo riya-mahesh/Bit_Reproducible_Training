@@ -1,0 +1,64 @@
+A100 experiments: /work/results/a100_no_atomics/b-19-13/20261123T182910Z_17606
+Snapshotted 105 files; 0 explicit CUDA atomic call lines
+PASS: snapshotted CUDA source has no explicit atomic calls
+3.9.18 (main, Sep 11 2023, 13:41:44) 
+[GCC 11.2.0] 2.6.0+cu124 12.4 NVIDIA A100-SXM4-40GB /venv/lib/python3.9/site-packages/repdl/__init__.py
+Building fresh CUDA extension (sm_80)
+Loaded fresh extension: /work/build/a100_no_atomics/b-19-13/20261123T182910Z_17606/package/repro_torch/_backend.cpython-39-x86_64-linux-gnu.so
+smoke
+PASS: 10-step weights match the recorded atomic baseline
+baseline_repro_repeat1
+baseline_repdl_repeat1
+baseline_stock_repeat1
+baseline_repro_repeat2
+baseline_repdl_repeat2
+baseline_stock_repeat2
+baseline_repro_repeat3
+baseline_repdl_repeat3
+baseline_stock_repeat3
+scaling_repro_batch50_repeat1
+scaling_stock_batch50_repeat1
+scaling_repro_batch50_repeat2
+scaling_stock_batch50_repeat2
+scaling_repro_batch200_repeat1
+scaling_stock_batch200_repeat1
+scaling_repro_batch200_repeat2
+scaling_stock_batch200_repeat2
+scaling_repro_batch500_repeat1
+scaling_stock_batch500_repeat1
+scaling_repro_batch500_repeat2
+scaling_stock_batch500_repeat2
+scaling_repro_batch1000_repeat1
+scaling_stock_batch1000_repeat1
+scaling_repro_batch1000_repeat2
+scaling_stock_batch1000_repeat2
+accuracy_repro_seed1
+accuracy_repdl_seed1
+accuracy_stock_seed1
+accuracy_repro_seed2
+accuracy_repdl_seed2
+accuracy_stock_seed2
+accuracy_repro_seed3
+accuracy_repdl_seed3
+accuracy_stock_seed3
+accuracy_repro_seed4
+accuracy_repdl_seed4
+accuracy_stock_seed4
+stages_repro
+stages_repdl
+stages_stock
+repeatability_repro_1
+repeatability_repro_2
+repeatability_repro_3
+check_training
+compare_atomic_baseline
+ncu_sample
+ncu_conv_gemm
+ncu_wgrad_batch100
+ncu_wgrad_batch500
+export_repro_sample
+export_repro_conv_gemm
+export_wgrad_batch100
+export_wgrad_batch500
+Download: /work/results/a100_no_atomics/b-19-13/20261123T182910Z_17606.tar.gz
+Status: COMPLETE; detailed logs: /work/results/a100_no_atomics/b-19-13/20261123T182910Z_17606

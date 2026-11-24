@@ -1,0 +1,17 @@
+==PROF== Connected to process 20251 (/share/apps/pyenv/py3.9/bin/python3.9)
+mode repro device cuda NVIDIA A100-SXM4-40GB torch 2.6.0+cu124 cuda 12.4
+batch 100 lr 0.01 epochs 2 slices 3 seed 0
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init aaed3ac81bea729c209ada6d6d88748a15a6d1616a0b896df3f67262f5f0ca10
+==PROF== Profiling "weight_grad_kernel": 0%....50%....100% - 47 passes
+==PROF== Profiling "weight_grad_kernel": 0%....50%....100% - 47 passes
+hash weights after epoch 1 (10 steps) 286b280c7e33bcb70aa2bf329f1e01a8e7764765e90f2305f478afdbe895f64d
+test accuracy after epoch 1: 0.5951
+hash test logits ce4c2a8117e3b0918a01fb5ef4a3411c362a33ad043250f4dcacb6e66c69f376
+hash train logits 4bd244e8deaa2703bd7f22acbecfcf26d9038b459c466878b6a096d25faedba1
+train accuracy 0.5899
+test accuracy 0.5951
+time train total 5.78 s; per step median 11.366 ms, mean 577.613 ms (10 steps)
+peak GPU memory 222.1 MiB
+==PROF== Disconnected from process 20251
+==PROF== Report: /work/results/a100_no_atomics/b-19-13/20261123T182910Z_17606/profiling/wgrad_batch100.ncu-rep

@@ -1,0 +1,275 @@
+{
+  "run": "results/a100_no_atomics/b-19-13/20261123T182910Z_17606",
+  "archive_sha256": "5ea8fb5fe1bb012f1e2d982b4b0ae1be2c80b29f03415835e8bd7ea22cf4e988",
+  "checks_passed": true,
+  "full_runs": 43,
+  "source_files": 105,
+  "cuda_files": 35,
+  "source_matches_all_cims_archives": true,
+  "explicit_cuda_atomic_candidates": [],
+  "software": {
+    "torch": "2.6.0+cu124",
+    "torch_cuda": "12.4",
+    "nvcc": "12.6.77",
+    "driver": "610.43.02"
+  },
+  "combined_configurations": 8,
+  "combined_full_runs": 323,
+  "cross_gpu_groups": [
+    {
+      "mode": "repro",
+      "seed": 0,
+      "batch": 50,
+      "slices": 3,
+      "records": 16,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 0,
+      "batch": 100,
+      "slices": 3,
+      "records": 35,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 0,
+      "batch": 200,
+      "slices": 3,
+      "records": 16,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 0,
+      "batch": 500,
+      "slices": 3,
+      "records": 16,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 0,
+      "batch": 1000,
+      "slices": 3,
+      "records": 16,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 1,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 2,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 3,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repro",
+      "seed": 4,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repdl",
+      "seed": 0,
+      "batch": 100,
+      "slices": 3,
+      "records": 32,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repdl",
+      "seed": 1,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repdl",
+      "seed": 2,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repdl",
+      "seed": 3,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    },
+    {
+      "mode": "repdl",
+      "seed": 4,
+      "batch": 100,
+      "slices": 3,
+      "records": 8,
+      "distinct_hash_sets": 1,
+      "distinct_logged_loss_sequences": 1
+    }
+  ],
+  "matching_atomic_a100_records": 16,
+  "summary": {
+    "repro": {
+      "baseline_step_ms": 2.929556998424232,
+      "baseline_train_seconds": 3.621993244996702,
+      "baseline_step_ms_runs": [
+        2.93093499931274,
+        2.929556998424232,
+        2.911550000135321
+      ],
+      "test_accuracy_mean": 0.98002,
+      "test_accuracy_sd": 0.0028048172846016095,
+      "peak_allocated_memory_mib": 222.1103515625,
+      "stage_ms_median": {
+        "forward": 1.1722345007001422,
+        "backward": 1.6983389996312326,
+        "optimizer": 0.22553800044988748
+      },
+      "scaling_step_ms": {
+        "50": 2.5118489993474213,
+        "200": 3.703705498992349,
+        "500": 5.9906954993493855,
+        "1000": 11.445168500358704
+      }
+    },
+    "repdl": {
+      "baseline_step_ms": 13.265538000268862,
+      "baseline_train_seconds": 16.083581692040752,
+      "baseline_step_ms_runs": [
+        13.169698999263346,
+        13.269142000353895,
+        13.265538000268862
+      ],
+      "test_accuracy_mean": 0.9796,
+      "test_accuracy_sd": 0.001349073756323212,
+      "peak_allocated_memory_mib": 218.63671875,
+      "stage_ms_median": {
+        "forward": 1.006850001431303,
+        "backward": 10.024285002145916,
+        "optimizer": 2.532390000851592
+      },
+      "scaling_step_ms": {}
+    },
+    "stock": {
+      "baseline_step_ms": 2.128176998667186,
+      "baseline_train_seconds": 2.9938583230214135,
+      "baseline_step_ms_runs": [
+        2.128176998667186,
+        2.1129559972905554,
+        2.1626250018016435
+      ],
+      "test_accuracy_mean": 0.9767,
+      "test_accuracy_sd": 0.003126499640172675,
+      "peak_allocated_memory_mib": 238.6796875,
+      "stage_ms_median": {
+        "forward": 0.6735810020472854,
+        "backward": 1.075446001777891,
+        "optimizer": 0.47868800174910575
+      },
+      "scaling_step_ms": {
+        "50": 2.130345501427655,
+        "200": 2.1832575021107914,
+        "500": 2.2432320001826156,
+        "1000": 2.4316489980265033
+      }
+    }
+  },
+  "profiles": {
+    "repro_sample": {
+      "kernel_durations_us": [
+        77.79,
+        8.06,
+        400.77,
+        42.56,
+        27.65,
+        4.06,
+        8.13,
+        7.26,
+        5.82,
+        137.06
+      ],
+      "bytes": 10975731,
+      "sha256": "440492f9923d499231d1b9f45fc9f8c84a917d1c2017d8be57da6984dc720eae"
+    },
+    "repro_conv_gemm": {
+      "kernel_durations_us": [
+        17.12,
+        16.77,
+        17.38,
+        18.27,
+        17.73,
+        64.03,
+        397.44,
+        665.79,
+        25.89,
+        147.33,
+        28.29,
+        18.43
+      ],
+      "bytes": 7508991,
+      "sha256": "bad310d4a578ff427b3b9d6cd5c4c27f1ee21adb5e5b266db93e5254052f6e2c"
+    },
+    "wgrad_batch100": {
+      "kernel_durations_us": [
+        397.38,
+        655.33
+      ],
+      "bytes": 3508507,
+      "sha256": "759e976500d5490236fb2110384ddc626cef142eedb070b387a44cf149ee6895"
+    },
+    "wgrad_batch500": {
+      "kernel_durations_us": [
+        1980.0,
+        3270.0
+      ],
+      "bytes": 3591801,
+      "sha256": "bf88e34b8f9bcafe57b595bdfa9504a49bcf85d73cdbf7c9082da021a6c8a6be"
+    }
+  },
+  "preexisting_gpu_pids": [
+    "7206"
+  ],
+  "caveats": [
+    "A pre-existing python3 process (PID 7206, 420 MiB) was recorded on the GPU at setup; active compute overlap is not established.",
+    "PyTorch wheel CUDA 12.4 and extension compiler CUDA 12.6 constitute one mixed build configuration.",
+    "Source scan is not an audit of generated instructions or third-party libraries.",
+    "Archive payloads/checksum and profiler text exports were checked; binary .ncu-rep files were not opened in Nsight locally.",
+    "The extracted runner.log has final archive/status messages appended after the archive was created; all other archive files match the supplied directory."
+  ]
+}

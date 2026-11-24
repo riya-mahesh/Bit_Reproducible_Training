@@ -1,0 +1,32 @@
+A100 NON-ATOMICS RESULTS AUDIT
+
+results/a100_no_atomics/b-19-13/20261123T182910Z_17606
+PASS: supplied archive SHA256 matches sidecar; 43 full runs, smoke, all command exits and four profiler captures checked.
+PASS: 105 archived source files match their manifest and all four CIMS source snapshots; 35 CUDA files have no explicit atomic call candidates.
+PASS: repro (131 combined records, 9 setting groups) and RepDL (64 records, 5 seed groups) match across A100 and the seven CIMS configurations, including all recorded hashes and logged loss bit sequences.
+PASS: 16 comparable old atomic A100 repro records match the new A100 results.
+Eight software/hardware configurations and 323 full training runs in total, across four GPU models.
+
+Configuration: A100-SXM4-40GB, PyTorch 2.6.0+cu124, nvcc 12.6.77, Python 3.9 extension, driver 610.43.02.
+This is ONE mixed CUDA build configuration, not a CUDA version sweep.
+
+Baseline timing: median of three unprofiled seed-0 batch-100 run medians. Accuracy: mean over seeds 0..4, using baseline repeat 1 for seed 0.
+Mode       Step ms    Test accuracy mean    Peak allocated memory MiB
+repro        2.930               98.002%                       222.1
+repdl       13.266               97.960%                       218.6
+stock        2.128               97.670%                       238.7
+
+Recorded RepDL/repro time ratio: 4.53x; repro/stock time ratio: 1.38x.
+Performance caveat: pre-existing python3 PID 7206 held 420 MiB at setup. This does not establish active overlap, but prevents claiming an exclusive/idle GPU benchmark from the saved snapshot alone.
+Repro stage medians across four profile runs: {'forward': 1.1722345007001422, 'backward': 1.6983389996312326, 'optimizer': 0.22553800044988748}
+
+Profiler weight-gradient duration, batch 100: 397.38 us and 655.33 us; batch 500: 1.98 ms and 3.27 ms.
+The basic launch sample now captures convolution/reduction/pooling/finite-scan work, not the same Adam-dominated kernels as the earlier atomic sample. Launch offsets do not identify the same operations after implementation changes.
+
+A pre-existing python3 process (PID 7206, 420 MiB) was recorded on the GPU at setup; active compute overlap is not established.
+PyTorch wheel CUDA 12.4 and extension compiler CUDA 12.6 constitute one mixed build configuration.
+Source scan is not an audit of generated instructions or third-party libraries.
+Archive payloads/checksum and profiler text exports were checked; binary .ncu-rep files were not opened in Nsight locally.
+The extracted runner.log has final archive/status messages appended after the archive was created; all other archive files match the supplied directory.
+
+Detailed batch scaling, profiler hashes/durations and group checks: audit_summary.json.

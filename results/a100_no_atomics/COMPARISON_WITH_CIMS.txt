@@ -1,0 +1,45 @@
+A100 VS CIMS NON-ATOMICS EXPERIMENTS
+
+Reproducibility: A100 plus seven CIMS configurations have matching hashes and logged loss bits for equivalent settings. 131 repro records in nine seed/batch/S groups; 64 RepDL records in five seed groups. All archived source manifests match.
+This compares 43 A100 full runs with 280 CIMS full runs. All use two epochs, learning rate 0.01, S=3. The baseline uses batch 100 and seed 0.
+
+TIMING (ms/step): median of the three unprofiled baseline run medians. Relative ratios are observed, not controlled GPU-only speedups.
+Configuration                       Repro     RepDL     Stock   RepDL/Repro   Repro-time/A100-time
+A100 / wheel 12.4 + nvcc 12.6         2.930    13.266     2.128          4.53                    1.00
+cuda2/cuda124                         3.595    17.741     2.711          4.94                    1.23
+cuda2/cuda126                         3.456    18.122     2.760          5.24                    1.18
+cuda3/cuda124                         3.252    14.861     2.046          4.57                    1.11
+cuda3/cuda126                         3.201    14.624     2.028          4.57                    1.09
+cuda5/cuda124                        11.555    14.285     9.021          1.24                    3.94
+cuda5/cuda126                        11.586    24.211     8.851          2.09                    3.95
+cuda5/cuda130                        11.597    26.135     9.199          2.25                    3.96
+
+REPRO BATCH SCALING (ms/step): median of two run medians per batch. Batch 100 is the three-repeat baseline above.
+Configuration                           B50       B200       B500      B1000
+A100 / wheel 12.4 + nvcc 12.6           2.512      3.704      5.991     11.445
+cuda2/cuda124                           3.337      4.484      7.825     14.394
+cuda2/cuda126                           3.463      4.656      7.744     14.469
+cuda3/cuda124                           2.448      4.620      9.833     18.742
+cuda3/cuda126                           2.521      4.606      9.827     18.715
+cuda5/cuda124                          11.579     11.520      9.858     10.025
+cuda5/cuda126                          11.517     11.559     10.056     13.056
+cuda5/cuda130                          11.369     11.533     12.699     12.780
+
+ACCURACY / MEMORY
+Repro five-seed mean test accuracy: 98.002%, sample SD 0.280 percentage points, identical for all configurations. RepDL: 97.960%, SD 0.135 percentage points, identical for all configurations. These are separate algorithm outputs; repro is not claimed to match RepDL bits.
+Stock five-seed mean: A100 97.670%; CIMS range 97.820% to 98.068%. No statistical superiority claim follows from five seeds.
+At baseline batch 100, repro peak PyTorch-allocated memory is 222.110 MiB on every configuration. This is the harness allocator metric, including data/evaluation, not total process VRAM.
+
+INTERPRETATION
+At batch 100 A100 has the lowest repro step time: 1.18–1.23x lower-time ratio versus cuda2, 1.09–1.11x versus cuda3, and 3.94–3.96x versus cuda5.
+The ranking is workload-dependent. At batch 1000 cuda5/CUDA 12.4 records 10.025 ms versus A100 11.445 ms. Do not extrapolate the batch-100 ranking to all batches.
+The RTX 4070 shows higher times for stock as well as repro at batch 100. The gap is therefore not evidence by itself of a defect specific to reproducible arithmetic. CPU/launch/synchronization overhead and runtime conditions need separate measurement.
+cuda5 RepDL/CUDA 12.6 baseline run medians vary from 15.072 to 25.851 ms; its aggregate should not be interpreted as a clean CUDA-version regression.
+
+LIMITS
+Pre-existing GPU processes were recorded for A100 (PID 7206, 420 MiB), cuda2/CUDA 12.6 and cuda3/CUDA 12.4. Their presence does not prove active overlap throughout the run. Repeat performance measurements with an idle/reserved GPU before definitive speedup claims.
+Empty startup process lists do not establish uninterrupted exclusive GPU use.
+A100 uses PyTorch 2.6.0+cu124 but nvcc 12.6.77. CIMS uses matching wheel/toolkit versions (12.4/2.6.0; 12.6/2.7.1; 13.0/2.9.0). CPUs, drivers and Python versions also differ. These are whole-system comparisons.
+A100 has four Nsight captures and three extra repro profile repeats. Each CIMS configuration has two weight-gradient captures and one repro profile run. Profiler timing is not included in the baseline timing table.
+
+Inputs: results/a100_no_atomics/audit_summary.json and bit-repro-results/audit_summary.json; these audits were generated from the supplied raw records and archived source.

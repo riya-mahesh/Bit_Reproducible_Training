@@ -1,0 +1,25 @@
+==PROF== Connected to process 19418 (/share/apps/pyenv/py3.9/bin/python3.9)
+mode repro device cuda NVIDIA A100-SXM4-40GB torch 2.6.0+cu124 cuda 12.4
+batch 100 lr 0.01 epochs 2 slices 3 seed 0
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init aaed3ac81bea729c209ada6d6d88748a15a6d1616a0b896df3f67262f5f0ca10
+==PROF== Profiling "filter_scales_kernel" - 0 (1/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "quantize_dy_per_filter_kernel" - 1 (2/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "weight_grad_kernel" - 2 (3/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "sum_general_kernel" - 3 (4/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "max_pool_backward_kernel" - 4 (5/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "vectorized_elementwise_kernel" - 5 (6/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "vectorized_elementwise_kernel" - 6 (7/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "repro_scan_finite_kernel" - 7 (8/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "repro_scan_merge_kernel" - 8 (9/10): 0%....50%....100% - 10 passes
+==PROF== Profiling "filter_scales_kernel" - 9 (10/10): 0%....50%....100% - 10 passes
+hash weights after epoch 1 (20 steps) 51c70bc670bf31c70154c7006451429cae053d73d2b61eb04033edbe37280af5
+test accuracy after epoch 1: 0.7877
+hash test logits c73313bdc3da5d534960852e23791bf44ba628997932e36aba2b7a9ed7f6b1d4
+hash train logits b094cd259004484cd1f4d8c2a365ee26b8df2a5b1df7f3330952c0379e8d4f5b
+train accuracy 0.7819
+test accuracy 0.7877
+time train total 6.51 s; per step median 10.521 ms, mean 10.578 ms (20 steps)
+peak GPU memory 222.1 MiB
+==PROF== Disconnected from process 19418
+==PROF== Report: /work/results/a100_no_atomics/b-19-13/20261123T182910Z_17606/profiling/repro_sample.ncu-rep
