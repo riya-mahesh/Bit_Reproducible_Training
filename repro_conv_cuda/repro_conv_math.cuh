@@ -101,15 +101,17 @@ __host__ __device__ inline void forward_window(const float* x, const int* Wq, co
 }
 
 // Adds the weight-gradient terms at position (c, ky, kx) for the window at (oy, ox) of every
-// image in [0, N). D is dY quantized per filter, in dY's layout; t holds one INT64 per filter.
+// image in [n0, n1). D is dY quantized per filter, in dY's layout; t holds one INT64 per filter.
 // The window's place in the image is the same for all images, so it is worked out once.
+// The terms are exact integers, so splitting the images into ranges cannot change the total.
 __host__ __device__ inline void weight_grad_windows(const float* x, const int* D, const ConvShape& g, int oy, int ox,
-                                                    int c, int ky, int kx, int eX, int S, int64_t* t) {
+                                                    int c, int ky, int kx, int eX, int S, int64_t* t,
+                                                    int n0, int n1) {
     int y = oy * g.SY - g.PY + ky, xx = ox * g.SX - g.PX + kx;
     if (y < 0 || y >= g.H || xx < 0 || xx >= g.W) return;    // padding: X = 0
     size_t per_image = (size_t)g.C * g.H * g.W, at = ((size_t)c * g.H + y) * g.W + xx;
     size_t per_filter = (size_t)g.OH() * g.OW(), offset = (size_t)oy * g.OW() + ox;
-    for (int n = 0; n < g.N; ++n) {
+    for (int n = n0; n < n1; ++n) {
         int X = fixed_point(x[(size_t)n * per_image + at], eX, S);
         if (X == 0) continue;
         const int* d = D + (size_t)n * g.F * per_filter + offset;
@@ -117,13 +119,14 @@ __host__ __device__ inline void weight_grad_windows(const float* x, const int* D
     }
 }
 
-// Largest input magnitude bits at position (c, ky, kx) for the window at (oy, ox), all images.
-__host__ __device__ inline uint32_t position_max_bits(const float* x, const ConvShape& g, int oy, int ox, int c, int ky, int kx) {
+// Largest input magnitude bits at position (c, ky, kx) for the window at (oy, ox), images [n0, n1).
+__host__ __device__ inline uint32_t position_max_bits(const float* x, const ConvShape& g, int oy, int ox, int c, int ky, int kx,
+                                                      int n0, int n1) {
     int y = oy * g.SY - g.PY + ky, xx = ox * g.SX - g.PX + kx;
     if (y < 0 || y >= g.H || xx < 0 || xx >= g.W) return 0u;
     size_t per_image = (size_t)g.C * g.H * g.W, at = ((size_t)c * g.H + y) * g.W + xx;
     uint32_t m = 0;
-    for (int n = 0; n < g.N; ++n) {
+    for (int n = n0; n < n1; ++n) {
         uint32_t a = repro_gemm::float_to_bits(x[(size_t)n * per_image + at]) & 0x7FFFFFFFu;
         if (a > m) m = a;
     }

@@ -10,6 +10,8 @@
 
 The forward pass and weight gradient are bit-identical to `repro_gemm` on the im2col matrix. A pixel of the input gradient sums over several windows and all filters, so its terms need one shared scale, which GEMM's per-row and per-column scales don't provide.
 
+The weight gradient splits the batch into chunks of 8 images, one block per (weight position, chunk), so its grid grows with the batch instead of staying at one block per weight position. Each chunk produces exact INT64 partial sums and partial maxima, and a final kernel adds the chunks in a fixed order and rounds once. Because the sums are exact, the result is bit-identical for any chunk size, including the previous one-chunk version.
+
 Bias is separate: add it with one IEEE addition, and get its gradient from `repro_sum`. Supports stride and zero padding, but not groups or dilation. Limits: K ≤ 1024 values per window, and at most 256 filters.
 
 ## Results

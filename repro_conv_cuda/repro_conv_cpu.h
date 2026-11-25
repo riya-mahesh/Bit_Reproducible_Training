@@ -59,10 +59,10 @@ inline void cpu_conv2d_grad_weight(const float* dy, const float* x, float* dw, c
         int c, ky, kx;
         position_of(g, k, c, ky, kx);
         uint32_t m = 0;
-        for (int i = 0; i < per; ++i) m = std::max(m, position_max_bits(x, g, i / ow, i % ow, c, ky, kx));
+        for (int i = 0; i < per; ++i) m = std::max(m, position_max_bits(x, g, i / ow, i % ow, c, ky, kx, 0, g.N));
         int eX = scale_exponent(repro_gemm::bits_to_float(m));
         std::vector<int64_t> t(g.F, 0);
-        for (int i = 0; i < per; ++i) weight_grad_windows(x, D.data(), g, i / ow, i % ow, c, ky, kx, eX, S, t.data());
+        for (int i = 0; i < per; ++i) weight_grad_windows(x, D.data(), g, i / ow, i % ow, c, ky, kx, eX, S, t.data(), 0, g.N);
         for (int f = 0; f < g.F; ++f) dw[(size_t)f * K + k] = round_to_float(t[f], eF[f] + eX + e0);
     });
 }
