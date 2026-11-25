@@ -14,6 +14,15 @@ Three questions, one set of scripts:
 | `03_accuracy_speed.sh TAG` | Ours, RepDL, and stock over 5 seeds, profiled runs, and RepDL's own example | At least one configuration per GPU |
 | `slurm/burst_job.sbatch` | Runs steps 02 and 03 as a burst job | Burst cluster |
 | `compare_results.py` | Turns everything under `results/` into the three answers | Your Mac, after copying results back |
+| `rerun_servers.sh` | NVIDIA GPU reruns with isolated source/builds and server/config/run output directories | cuda2, cuda3, cuda5 |
+| `run_a100_no_atomics.sh` | Rebuild without explicit GPU atomic calls, rerun the A100 MNIST protocol, profile, check hashes, archive results | A100 inside Singularity |
+
+For the A100 runner and container command, see [A100_RUN_GUIDE.txt](A100_RUN_GUIDE.txt).
+
+For the new runner, environment preparation, presets, and the differences between
+the CIMS and A100 experiments, see [RERUN_GPU_GUIDE.txt](RERUN_GPU_GUIDE.txt).
+The runner requires an explicit source choice: the archived A100 atomic source
+or the current working tree. It does not run CPU training experiments.
 
 ## What counts as a pass
 

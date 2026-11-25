@@ -1,0 +1,252 @@
+NVIDIA GPU experiment reruns
+===========================
+
+Run experiments/rerun_servers.sh on cuda2, cuda3, or cuda5, NOT on the Mac.
+Training always uses --device cuda. Kernel suites use NVIDIA CUDA executables.
+There is no CPU training, CPU benchmark suite, or exhaustive CPU math experiment.
+Correctness tests may calculate CPU reference answers for GPU outputs.
+
+The companion rerun_support.py must remain alongside the bash script.
+
+1. Choose and preserve the source
+--------------------------------
+
+For comparison with the downloaded A100 atomic results, use:
+
+  --source "$PWD/a100_atomic_source.tar"
+
+Upload that archive and the updated experiments scripts to the CIMS repository.
+The script reads the archive directly, so it does not overwrite the working tree.
+Both .tar and .tar.gz are supported. It snapshots source and data, excludes old
+compiled binaries and results, and hashes the files it will build.
+
+To deliberately test the modified current checkout instead:
+
+  --source working-tree
+
+The current checkout includes changes removing GPU atomics. Those results belong
+to a different source version; do not silently combine them with the A100 atomic
+baseline. source_manifest.json records the archive hash, each snapshotted file's
+hash, and locations of explicit CUDA atomic calls.
+
+2. Environments on the NVIDIA servers
+------------------------------------
+
+Use a scratch root outside the CIMS home quota:
+
+  export REPRO_WORK="/scratch/$USER/repro"
+  export REPRO_ENV_ROOT="$REPRO_WORK/envs"
+
+If environments already exist, set REPRO_ENV_ROOT to the directory containing
+cuda124/, cuda126/, and cuda130/. Each must contain bin/python3 and config as
+created by 01_make_env.sh. The runner reuses environments without reinstalling
+packages. Different hosts may share already-prepared environments read-only;
+do not install/update an environment while another server is using it.
+
+If they do not exist, run the applicable setup commands ON CIMS, once per
+environment filesystem. This step downloads dependencies and compiles RepDL:
+
+  bash experiments/01_make_env.sh cuda124 cuda-12.4 2.6.0 cu124
+  bash experiments/01_make_env.sh cuda126 cuda-12.6 2.7.1 cu126
+  bash experiments/01_make_env.sh cuda130 cuda-13.0 2.9.0 cu130
+
+cuda3 needs only the first two configurations for the historical matrix. Use an
+available Python supported by the selected PyTorch wheel; the old Python 3.9
+environment cannot be assumed to support every newer PyTorch release. PYTHON
+selects the setup interpreter. Module names above match the CIMS setup previously
+used; check module avail if this machine's names differ.
+
+01_make_env.sh also retains the pinned RepDL checkout and installs torchvision
+for its official example. The new runner records missing RepDL/example failures
+instead of declaring the full experiment complete. If you only have a manually
+created .venv, it is not automatically a configured multi-version environment.
+
+3. Run the same command on each server
+-------------------------------------
+
+From the repository root on each of cuda2, cuda3, and cuda5:
+
+  export REPRO_WORK="/scratch/$USER/repro"
+  export REPRO_ENV_ROOT="$REPRO_WORK/envs"
+  export RESULTS_ROOT="$PWD/results/reruns"
+
+  bash experiments/rerun_servers.sh \
+    --source "$PWD/a100_atomic_source.tar" --suite mnist
+
+The default CUDA matrix is selected from hostname -s:
+
+  cuda2  RTX 2080 Ti  CUDA 12.4 / 12.6 / 13.0
+  cuda3  TITAN V      CUDA 12.4 / 12.6
+  cuda5  RTX 4070     CUDA 12.4 / 12.6 / 13.0
+
+The corresponding PyTorch versions are 2.6.0, 2.7.1, and 2.9.0. Both toolkit
+and wheel versions are checked. This tests GPU/software configurations, not
+CUDA version as an independently controlled variable.
+
+All physical GPU indices are selected by default. Select only GPUs allocated
+to you, e.g. --gpus "0" or --gpus "0 1". If CUDA_VISIBLE_DEVICES was already set,
+the runner requires explicit physical indices rather than guessing its mapping.
+On Slurm, do not request GPUs outside your allocation.
+
+For a shorter first run, select only CUDA 12.4 and one GPU:
+
+  bash experiments/rerun_servers.sh \
+    --source "$PWD/a100_atomic_source.tar" \
+    --suite mnist --configs cuda124 --gpus 0
+
+Use --dry-run to print the configuration plan without running/installing anything.
+No command deletes or rebuilds the source checkout's existing _backend.so.
+
+4. What each preset runs
+-----------------------
+
+--suite mnist (default)
+  - Two seed-0, batch-100, S=3, two-epoch repro runs on EACH selected GPU.
+  - On the first selected GPU: repro, RepDL, stock; seeds 0..4 at CUDA 12.4,
+    seed 0 at CUDA 12.6/13.0; one --profile run per method.
+  - RepDL's official example, with its own initialization, logged separately.
+  - Same data ordering, initialization, learning rate 0.01 and 1,200 training
+    steps in the shared MNIST harness. The official example is a separate test.
+
+--suite kernels
+  - GPU conv, pool/Adam, exact-sum and softmax tests; conv/sum/math benchmarks.
+  - Exhaustive custom repro_expf/repro_logf GPU hashes over all 2^32 inputs.
+  - GPU operation suite (the directory is called gpt2_ops_suite, but this is
+    individual operations, NOT GPT-2 training).
+  - No Python model training or CPU experiment suite.
+
+--suite full
+  - Everything in mnist and kernels.
+  - At CUDA 12.4 only: standalone GEMM tests/hash sweeps/benchmarks, and the
+    original 14-function exhaustive GPU math comparison.
+  - GEMM defaults: SLICES="1 3", 3 processes, 5 runs per case, the shapes,
+    distributions, and split-K values in the snapshotted run_repro.sh.
+  - Set SLICES="1 2 3" to ADD S=2 coverage; that expands the historical protocol.
+  - Exhaustive scans can take hours. Run under a persistent remote terminal.
+  - There is no automatic claim that every test passes: older archived test
+    code may retain previously reported bugs. Failures are kept in the logs.
+
+--suite a100
+  - Runs on the first selected NVIDIA GPU; despite its name, also usable on CIMS
+    to match the A100 experiment protocol.
+  - Three unprofiled seed-0 baseline repetitions for repro/RepDL/stock.
+  - Seeds 1..4 for all three; one stage profile per method at seed 0.
+  - Batches 50, 200, 500, 1000: repro/stock, two repetitions each, two epochs.
+  - Add --ncu for two targeted weight-gradient captures at batches 100 and 500.
+    This does not repeat the earlier broad GEMM/conv sample or Adam sample.
+  - Example: --suite a100 --configs cuda124 --gpus 0 --ncu
+  - This preset uses matching CIMS toolkit/wheel versions. It does not recreate
+    the A100 Singularity environment or its CUDA 12.6 compiler automatically.
+
+5. Output and completion checks
+-------------------------------
+
+RESULTS_ROOT/
+  cuda2/<UTC_timestamp_PID>/
+    source.tar.gz                 exact source/data snapshot used for this run
+    source_manifest.json          source identity, per-file SHA256, atomic calls
+    rerun_servers.sh               orchestration script used
+    rerun_support.py               helper used
+    plan.txt, runner.log, status.txt
+    expected_runs.tsv, run_checks.json
+    cuda124/
+      environment/                GPU/CPU specs, nvcc, pip freeze, config,
+                                  loaded extension path and binary SHA256
+      mnist/                      completed .txt and .json training records
+      logs/                       full build/test/training/profile output
+      kernel_results/             hashes and operation results
+      profiling/                  optional .ncu-rep files
+      repdl_official/             official example's outputs/data
+      commands.log, status.tsv, status.txt
+      expected_runs.tsv, run_checks.json
+    cuda126/...
+    cuda130/...
+  cuda3/<UTC_timestamp_PID>/...
+  cuda5/<UTC_timestamp_PID>/...
+
+Scratch builds use REPRO_WORK/reruns/<server>/<run-id>/<config>/, separate from
+the shared source and environment directories. Each selected GPU has a separate
+extension package. Existing run IDs are rejected, not overwritten.
+
+Training checks verify the expected step counts and configurations and compare
+repro hashes for matching seed/batch/S across repetitions, GPUs and CUDA versions
+within that invocation. Different seeds/batches are not compared to each other.
+Kernel command exit statuses are checked; exhaustive cross-server kernel hashes
+still need comparing after all servers finish. No automatic CPU equality claim
+is made. Other methods' hashes are saved but not required to match repro's.
+
+A missing RepDL dependency or failed official example is reported as a failure,
+not silently skipped. The runner exits nonzero on an incomplete configuration.
+Preserve the ENTIRE RESULTS_ROOT/<server>/<run-id> directory, not just mnist/.
+The old compare_results.py does not automatically discover this new directory
+layout; analyze these JSON records separately rather than copying them into old
+results and mixing source versions.
+
+6. Differences between the saved CIMS and A100 experiments
+---------------------------------------------------------
+
+Evidence: results/mnist/cuda{2,3,5}_cuda*/ JSON, experiments/MNIST_RESULTS.md,
+repro_math_cuda/results/cuda{2,3,5}/math.log, and a100_atomic_results.tar plus
+a100_atomic_source.tar. Audited on 2026-11-23.
+
+Hardware/software
+  CIMS: RTX 2080 Ti, TITAN V, RTX 4070; eight GPU/CUDA configurations above.
+  A100: one A100-SXM4-40GB, torch 2.6.0+cu124, toolkit compiler 12.6 inside
+        the cuda12.6.2 development container. No A100 CUDA-version sweep.
+
+Training workload
+  Both: LeNet on MNIST, two epochs, Adam lr 0.01, S=3, batch 100 baseline,
+        matched initialization and data ordering in the shared harness.
+  Both historical sets concern the atomic implementation. The A100 source
+  archive supplies a specific, verified source snapshot for new comparisons;
+  existing CIMS result files alone do not prove source byte identity.
+
+Correctness and seeds
+  CIMS: two repro runs on each of two GPUs on cuda2/cuda3 in correctness logs;
+        cuda5 has one GPU. All three methods have seeds 0..4 at CUDA 12.4 and
+        seed 0 elsewhere. Some extra secondary-GPU stage profiles also exist.
+  A100: four saved repro seed-0 batch-100 profiled runs agree in all logged
+        hashes. Seeds 1..4 exist unprofiled for all three methods; seed-0
+        accuracy is available in stage profiles. Repro batch-scaling repeats
+        also agree for matching batch size.
+
+Timing repetitions
+  CIMS: main speed tables use per-step statistics from seed runs; not three
+        independent fixed-seed repetitions of every method in every config.
+  A100: three unprofiled seed-0 repetitions per method were requested, but
+        NONE of those nine baseline records is in the downloaded results
+        archive audited here. Recover separately if saved under /work/results/
+        mnist/a100. The rerun a100 preset explicitly fills that protocol gap.
+
+Scaling and profiling
+  CIMS historical MNIST: primarily batch 100; stage profiles for all methods.
+  A100: batches 50/200/500/1000 for repro and stock, two runs each (16 runs);
+        no RepDL batch sweep in the archive. Three stage profiles, one per
+        method, plus earlier repeated repro profiles.
+  A100: four Nsight Compute reports with text exports: initial Adam/elementwise
+        sample, conv/GEMM sample, and weight gradients at batches 100 and 500.
+  Do not call those selected-kernel captures an aggregate training timeline.
+
+Operation-level and exhaustive tests
+  CIMS includes separate GEMM/reduction/conv/math/NN operations and exhaustive
+  scans. The original 14-library-function comparison used CUDA 12.4 on all
+  three GPU generations. Custom exp/log have additional multi-version records.
+  The historical summary reports incomplete operation-suite coverage due to
+  a test bug; do not describe all historical component tests as passed.
+  A100 downloaded results contain training and Nsight profiles, not evidence
+  of a completed standalone exhaustive/kernel correctness suite.
+
+Memory and measurement interpretation
+  Both MNIST harnesses report PyTorch peak allocated memory over the run,
+  including resident data/evaluation, not isolated training-only memory.
+  A100 additionally supplies memory versus batch size via scaling records.
+  Training totals sum synchronized step timings and exclude loading/evaluation;
+  per-step statistics exclude the first five steps, totals include them.
+  Use unprofiled runs for timing comparisons. Nsight OPT estimates are not
+  measured speedups. Different batch sizes imply different optimization paths.
+
+Validation of the new scripts
+  Bash syntax and mocked orchestration were checked locally without NVIDIA
+  hardware. Tests cover server isolation, duplicate run IDs, incomplete runs,
+  source manifests and unsafe archive paths. Real CUDA compilation/execution
+  of this runner remains to be validated on CIMS.

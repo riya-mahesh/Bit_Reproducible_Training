@@ -1,0 +1,127 @@
+A100 experiments for the sources without explicit GPU atomics
+============================================================
+
+Use an allocated NVIDIA A100 GPU. Run inside the CUDA development Singularity
+image that worked previously. No NVIDIA experiments run on the local Mac.
+
+Keep the old atomic source and results. Extract the new ZIP into a separate
+directory. Reuse the old working venv (Torch 2.6.0+cu124, numpy, build dependencies,
+and RepDL). This runner does not install packages.
+
+On the HPC host, outside Singularity:
+
+  # Set this to the EXISTING environment that ran all three methods successfully.
+  export REPRO_ENV="/absolute/path/to/old/working/.venv"
+  cd /absolute/path/to/new/Bit_Reproducible_Training
+  singularity exec --nv \
+    --bind "$PWD:/work" --bind "$REPRO_ENV:/venv" --pwd /work \
+    /share/apps/images/cuda12.6.2-cudnn9.5.0-devel-ubuntu24.04.1.sif \
+    /bin/bash --noprofile --norc
+
+Inside Singularity:
+
+  bash /work/experiments/run_a100_no_atomics.sh --python /venv/bin/python3
+
+If the working venv is instead already bound at /work/.venv:
+
+  bash /work/experiments/run_a100_no_atomics.sh --python /work/.venv/bin/python3
+
+No manual cd, build, LD_PRELOAD, or compiler configuration is needed. The runner
+sets the container compiler/linker and libstdc++ preload needed by the existing
+HPC Python 3.9 environment. It preserves CUDA_VISIBLE_DEVICES from the allocation.
+CUDA 12.6 nvcc with the existing cu124 wheel will emit the same minor-version
+warning as before. The selected GPU must be an A100, with compute capability 8.0.
+
+What runs
+---------
+
+All full training runs use two epochs, S=3, learning rate 0.01, and CUDA:
+
+  Smoke:          repro, batch 100, seed 0, 10 steps; check old weight hash.
+  Timing:         repro / repdl / stock, seed 0, batch 100, three repeats = 9.
+  Batch scaling:  repro / stock, batches 50 / 200 / 500 / 1000,
+                  seed 0, two repeats = 16.
+  Seed sweep:     repro / repdl / stock, seeds 1 through 4, batch 100 = 12.
+  Stage timing:   repro / repdl / stock, seed 0, batch 100, --profile = 3.
+  Repeatability:  three extra repro stage-profile runs = 3.
+
+That is 43 full training runs plus smoke and these four Nsight Compute captures:
+
+  basic sample:   skip 100 launches, capture 10, train 20 steps at batch 100.
+  conv/GEMM:      filter the convolution/GEMM kernels, skip 20 matching launches,
+                  capture 12, train 20 steps at batch 100.
+  weight grads:   skip 4 matching launches, capture 2, train 10 steps;
+                  separate captures at batches 100 and 500.
+
+The old downloaded A100 results contain the seed, scaling, stage/repeatability,
+and four Nsight captures. The nine unprofiled seed-0 batch-100 timing repeats
+were absent from that archive; this runner includes them explicitly.
+
+The sequence reproduces the earlier experiment settings, not the exact launch
+identities: removing atomics can change the kernels and launch sequence. Check
+the captured kernel names before comparing profiles. Nsight runs are separate
+from timing runs; do not use their reported training time as normal runtime.
+
+Build and correctness checks
+----------------------------
+
+The runner snapshots the selected checkout, rejects explicit atomic* calls in
+project .cu/.cuh files, and compiles a fresh sm_80 extension in a unique directory.
+It records the exact source files and hashes, loaded extension path and hash,
+GPU, CPU, nvcc, Python packages, and commands. It does not import a cached old
+extension from the original checkout. CPU std::atomic scheduling is unrelated.
+The source check is not a disassembly audit of PyTorch/RepDL or compiler output.
+
+The smoke check must match the recorded atomic baseline before full training.
+At completion, checks verify all expected full runs finished and repeated repro
+hashes match for the same seed, batch, and S. Seed-0 batch-100 weights and final
+logits are also checked against the earlier atomic A100 results.
+
+These are MNIST checks, not exhaustive arithmetic or launch-configuration tests.
+The separate experiments/check_no_atomics.sh GPU regression suite remains useful.
+The runner has been checked locally with simulated commands; actual GPU numerical
+validation of the updated source remains pending until it runs on your A100.
+
+Results and failures
+--------------------
+
+Default output:
+
+  /work/results/a100_no_atomics/<hostname>/<UTC_timestamp_PID>/
+  /work/results/a100_no_atomics/<hostname>/<UTC_timestamp_PID>.tar.gz
+  /work/results/a100_no_atomics/<hostname>/<UTC_timestamp_PID>.tar.gz.sha256
+
+The archive contains source.tar.gz, source_manifest.json, environment records,
+training text/JSON logs, Nsight .ncu-rep files and text exports, check results,
+commands, and status files. Download it and its checksum before losing access.
+/work is the host directory you bound, so these files persist on the host.
+It excludes the venv and compiled binary (whose hash is recorded).
+
+status.txt is COMPLETE only if requested stages and checks succeed. On failure,
+the script returns nonzero, writes FAILED and archives partial results. Read
+runner.log and logs/<stage>.log; do not report an incomplete run as a pass.
+Early errors before output setup cannot produce an archive. A killed job or
+full disk can also prevent archival, so check the final download message/files.
+
+Each invocation uses a new run ID and will not overwrite an existing run.
+Optional controls:
+
+  bash /work/experiments/run_a100_no_atomics.sh --dry-run
+  bash /work/experiments/run_a100_no_atomics.sh --python /venv/bin/python3 --skip-ncu
+
+Use --skip-ncu only when deliberately omitting Nsight (recorded in plan.json).
+Otherwise ncu must exist and GPU profiling permissions must allow it.
+A100_RESULTS_ROOT and A100_BUILD_ROOT can select different persistent/scratch
+paths visible inside the container. MAX_JOBS defaults to 4 for compilation.
+
+If RepDL is missing, install it in the existing environment inside Singularity:
+
+  export LD_PRELOAD="$(/usr/bin/g++ -print-file-name=libstdc++.so.6)"
+  CC=/usr/bin/gcc CXX=/usr/bin/g++ \
+  LDSHARED="/usr/bin/g++ -shared -pthread -B/usr/bin/" \
+  TORCH_CUDA_ARCH_LIST=8.0 MAX_JOBS=4 \
+  /venv/bin/python3 -m pip install --no-cache-dir --no-build-isolation --no-deps \
+    'git+https://github.com/microsoft/RepDL.git@acd95bb08eab4f9556b10daba6e6af131ce05a38'
+
+The shared MNIST harness does not require torchvision. This runner does not run
+RepDL's separate official example or the CIMS exhaustive math/GEMM experiments.
