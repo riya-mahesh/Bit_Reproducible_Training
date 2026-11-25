@@ -1,0 +1,19 @@
+==PROF== Connected to process 19596 (/usr/bin/python3.12)
+/home/hs5828/working_without_atomics_verified/experiment_workspace/a100_versions/envs/cuda130/lib/python3.12/site-packages/torch/backends/__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:80.)
+  self.setter(val)
+mode repro device cuda NVIDIA A100-SXM4-40GB torch 2.9.0+cu130 cuda 13.0
+batch 500 lr 0.01 epochs 2 slices 3 seed 0
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init aaed3ac81bea729c209ada6d6d88748a15a6d1616a0b896df3f67262f5f0ca10
+==PROF== Profiling "weight_grad_kernel": 0%....50%....100% - 50 passes
+==PROF== Profiling "weight_grad_kernel": 0%....50%....100% - 50 passes
+hash weights after epoch 1 (10 steps) 4e3525272e85a44ff20ec57ab592d9c24d154707a41dc730b61a3d5e30402cab
+test accuracy after epoch 1: 0.6473
+hash test logits 305ed6edb9b1259cf5fa1cff6744dae54bb6136ec70cd31020e527e3f5a85e74
+hash train logits 8e5d864f1582ce7a880dbe1d8383db1f97ac6ca6361ad52fe1292dc872c7aa4c
+train accuracy 0.6320
+test accuracy 0.6473
+time train total 7.64 s; per step median 20.148 ms, mean 763.921 ms (10 steps)
+peak GPU memory 253.2 MiB
+==PROF== Disconnected from process 19596
+==PROF== Report: /home/hs5828/working_without_atomics_verified/results/a100_no_atomics/cuda130/b-19-3/20261124T232439Z_cuda130_16527/profiling/wgrad_batch500.ncu-rep

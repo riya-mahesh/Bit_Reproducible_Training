@@ -1,0 +1,17 @@
+{
+  "protocol": "A100 no-atomics",
+  "full_training_runs": 49,
+  "baseline_repeats": 5,
+  "epochs": 2,
+  "slices": 3,
+  "configuration": "cuda124",
+  "expected_torch": "2.6.0",
+  "expected_cuda": "12.4",
+  "expected_nvcc": "12.4",
+  "container_image": "/share/apps/images/cuda12.6.2-cudnn9.5.0-devel-ubuntu24.04.1.sif",
+  "cuda_home": "/home/hs5828/working_without_atomics_verified/experiment_workspace/a100_versions/toolkits/cuda-12.4.1",
+  "baseline_batch": 100,
+  "lr": 0.01,
+  "nsight_requested": true,
+  "cuda_visible_devices": "0"
+}

@@ -1,0 +1,69 @@
+A100 experiments: /home/hs5828/working_without_atomics_verified/results/a100_no_atomics/cuda126/b-19-3/20261124T224928Z_cuda126_12503
+Snapshotted 117 files; 0 explicit CUDA atomic call lines
+PASS: snapshotted CUDA source has no explicit atomic calls
+3.12.3 (main, Nov  6 2024, 18:32:19) [GCC 13.2.0] 2.7.1+cu126 12.6 NVIDIA A100-SXM4-40GB /home/hs5828/working_without_atomics_verified/experiment_workspace/a100_versions/envs/cuda126/lib/python3.12/site-packages/repdl/__init__.py
+Building fresh CUDA extension (sm_80)
+Loaded fresh extension: /home/hs5828/working_without_atomics_verified/experiment_workspace/a100_versions/build/cuda126/b-19-3/20261124T224928Z_cuda126_12503/package/repro_torch/_backend.cpython-312-x86_64-linux-gnu.so
+smoke
+PASS: 10-step weights match the recorded atomic baseline
+baseline_repro_repeat1
+baseline_repdl_repeat1
+baseline_stock_repeat1
+baseline_repro_repeat2
+baseline_repdl_repeat2
+baseline_stock_repeat2
+baseline_repro_repeat3
+baseline_repdl_repeat3
+baseline_stock_repeat3
+baseline_repro_repeat4
+baseline_repdl_repeat4
+baseline_stock_repeat4
+baseline_repro_repeat5
+baseline_repdl_repeat5
+baseline_stock_repeat5
+scaling_repro_batch50_repeat1
+scaling_stock_batch50_repeat1
+scaling_repro_batch50_repeat2
+scaling_stock_batch50_repeat2
+scaling_repro_batch200_repeat1
+scaling_stock_batch200_repeat1
+scaling_repro_batch200_repeat2
+scaling_stock_batch200_repeat2
+scaling_repro_batch500_repeat1
+scaling_stock_batch500_repeat1
+scaling_repro_batch500_repeat2
+scaling_stock_batch500_repeat2
+scaling_repro_batch1000_repeat1
+scaling_stock_batch1000_repeat1
+scaling_repro_batch1000_repeat2
+scaling_stock_batch1000_repeat2
+accuracy_repro_seed1
+accuracy_repdl_seed1
+accuracy_stock_seed1
+accuracy_repro_seed2
+accuracy_repdl_seed2
+accuracy_stock_seed2
+accuracy_repro_seed3
+accuracy_repdl_seed3
+accuracy_stock_seed3
+accuracy_repro_seed4
+accuracy_repdl_seed4
+accuracy_stock_seed4
+stages_repro
+stages_repdl
+stages_stock
+repeatability_repro_1
+repeatability_repro_2
+repeatability_repro_3
+check_training
+compare_atomic_baseline
+ncu_sample
+ncu_conv_gemm
+ncu_wgrad_batch100
+ncu_wgrad_batch500
+export_repro_sample
+export_repro_conv_gemm
+export_wgrad_batch100
+export_wgrad_batch500
+Download: /home/hs5828/working_without_atomics_verified/results/a100_no_atomics/cuda126/b-19-3/20261124T224928Z_cuda126_12503.tar.gz
+Status: COMPLETE; detailed logs: /home/hs5828/working_without_atomics_verified/results/a100_no_atomics/cuda126/b-19-3/20261124T224928Z_cuda126_12503

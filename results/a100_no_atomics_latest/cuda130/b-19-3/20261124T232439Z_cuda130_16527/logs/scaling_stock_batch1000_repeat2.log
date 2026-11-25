@@ -1,0 +1,17 @@
+/home/hs5828/working_without_atomics_verified/experiment_workspace/a100_versions/envs/cuda130/lib/python3.12/site-packages/torch/backends/__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:80.)
+  self.setter(val)
+mode stock device cuda NVIDIA A100-SXM4-40GB torch 2.9.0+cu130 cuda 13.0
+batch 1000 lr 0.01 epochs 2 slices 3 seed 0
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init aaed3ac81bea729c209ada6d6d88748a15a6d1616a0b896df3f67262f5f0ca10
+hash weights after epoch 1 (60 steps) 821ac06026f15736736939e2d4f92601cd41ec85cfd508b1a1ec2096ad50cd14
+test accuracy after epoch 1: 0.9678
+  epoch 2 step 100 loss 0.0860 (bits 3db03131)
+hash weights after epoch 2 (120 steps) e6916a2a6482ebdc83bccd22ec043ad6feab828cd97988ad6547fe16adef5658
+test accuracy after epoch 2: 0.9770
+hash test logits 1d54b50ee2313fcbfcc685cf8f5370870d111681eda4d99aea2c3ae435305cec
+hash train logits 6f47966d6604f57f567ea24e9c06307daca4bdb69d34baa0670691aa9d9f80c5
+train accuracy 0.9753
+test accuracy 0.9770
+time train total 0.69 s; per step median 2.551 ms, mean 2.499 ms (120 steps)
+peak GPU memory 287.3 MiB

@@ -1,0 +1,44 @@
+{
+ "mode": "stock",
+ "tag": "a100_no_atomics",
+ "host": "b-19-3",
+ "device": "NVIDIA A100-SXM4-40GB",
+ "driver": "610.43.02",
+ "torch": "2.7.1+cu126",
+ "cuda": "12.6",
+ "seed": 2,
+ "slices": 3,
+ "batch": 100,
+ "lr": 0.01,
+ "epochs": 2,
+ "steps": 1200,
+ "profile": false,
+ "hashes": {
+  "weights_epoch_1": "a17f590878c335813723da2e643a59c889643275f4f46159a9289d9ee431b400",
+  "weights_epoch_2": "749783cdd7c94291c77a77c75e93485a34e3b34e58d5b79b70d4f3cc579cd264",
+  "test_logits": "c274f916ee45f4c4573b16359f02e75796165229086d04828daab374ab043504",
+  "train_logits": "70f00f192a1ab7233c4cde541419da9dd8a6983e36e62f61bc43a238a10ef037",
+  "init": "e618c78846abf5cd5c111a5fbb82d5789b3dc98d64dae04a7b9e8c1c500eb598"
+ },
+ "train_accuracy": 0.9802,
+ "test_accuracy": 0.9789,
+ "curve": [
+  {
+   "epoch": 1,
+   "step": 600,
+   "test_accuracy": 0.9794
+  },
+  {
+   "epoch": 2,
+   "step": 1200,
+   "test_accuracy": 0.9789
+  }
+ ],
+ "final_loss": 0.06277413666248322,
+ "train_seconds": 2.9542087040053957,
+ "step_ms_median": 2.1418200003608945,
+ "step_ms_mean": 2.148822913810843,
+ "step_ms_p95": 2.229124000223237,
+ "breakdown_ms": {},
+ "peak_memory_mib": 242.31689453125
+}

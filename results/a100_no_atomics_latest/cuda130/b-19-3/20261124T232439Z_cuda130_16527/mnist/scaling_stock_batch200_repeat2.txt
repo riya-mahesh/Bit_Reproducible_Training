@@ -1,0 +1,20 @@
+mode stock device cuda NVIDIA A100-SXM4-40GB torch 2.9.0+cu130 cuda 13.0
+batch 200 lr 0.01 epochs 2 slices 3 seed 0
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init aaed3ac81bea729c209ada6d6d88748a15a6d1616a0b896df3f67262f5f0ca10
+  epoch 1 step 100 loss 0.1159 (bits 3ded7594)
+  epoch 1 step 200 loss 0.1358 (bits 3e0b14e8)
+  epoch 1 step 300 loss 0.0852 (bits 3dae8451)
+hash weights after epoch 1 (300 steps) 74a1635fd7909711a6e4bc605186454d98a29bafb1a3c508831209a3492b2c84
+test accuracy after epoch 1: 0.9766
+  epoch 2 step 400 loss 0.0448 (bits 3d379e0c)
+  epoch 2 step 500 loss 0.0712 (bits 3d91e1c8)
+  epoch 2 step 600 loss 0.0251 (bits 3ccd957d)
+hash weights after epoch 2 (600 steps) 2a4a826dced69b9afb3303fedd5d2c6082c2497d897f0aadd0cd93348c3b1eea
+test accuracy after epoch 2: 0.9778
+hash test logits 2f56913b7180e9272dd81609e273b89f20d852ec65c5a8aed32f4ca03b9c3307
+hash train logits 9e9a1f376fb26be35df41611398411e48991b7deb36a334de1d34c0980e2fd4d
+train accuracy 0.9834
+test accuracy 0.9778
+time train total 1.68 s; per step median 2.165 ms, mean 2.175 ms (600 steps)
+peak GPU memory 240.9 MiB

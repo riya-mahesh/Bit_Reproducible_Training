@@ -1,0 +1,28 @@
+/home/hs5828/working_without_atomics_verified/experiment_workspace/a100_versions/envs/cuda130/lib/python3.12/site-packages/torch/backends/__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:80.)
+  self.setter(val)
+mode stock device cuda NVIDIA A100-SXM4-40GB torch 2.9.0+cu130 cuda 13.0
+batch 100 lr 0.01 epochs 2 slices 3 seed 0
+hash data 55c41ac0f5a8c45648c69c8349247c8db8573ea50fafdc37b5123844f825fae0
+hash init aaed3ac81bea729c209ada6d6d88748a15a6d1616a0b896df3f67262f5f0ca10
+  epoch 1 step 100 loss 0.1240 (bits 3dfe0be1)
+  epoch 1 step 200 loss 0.1243 (bits 3dfe9a6e)
+  epoch 1 step 300 loss 0.0766 (bits 3d9cdb5a)
+  epoch 1 step 400 loss 0.0718 (bits 3d92fdc1)
+  epoch 1 step 500 loss 0.0082 (bits 3c06f3c5)
+  epoch 1 step 600 loss 0.0963 (bits 3dc51fa8)
+hash weights after epoch 1 (600 steps) dd4ea2a82ccf6bb1a106a9c6cfecac51f60cf574499f98a61edadf321064e4a6
+test accuracy after epoch 1: 0.9758
+  epoch 2 step 700 loss 0.0371 (bits 3d182a64)
+  epoch 2 step 800 loss 0.0582 (bits 3d6e9740)
+  epoch 2 step 900 loss 0.1011 (bits 3dcf073c)
+  epoch 2 step 1000 loss 0.0427 (bits 3d2ec0ff)
+  epoch 2 step 1100 loss 0.0853 (bits 3dae9daf)
+  epoch 2 step 1200 loss 0.1389 (bits 3e0e415f)
+hash weights after epoch 2 (1200 steps) 4017dcc1212a8cb7e6fa6a08c8ecaa29bada49b196c31743d210719011e5c210
+test accuracy after epoch 2: 0.9829
+hash test logits 5e369ba7bc50d7262e83130b26549175de1ad161c4ba95a8f26931abc405d8ab
+hash train logits 6c4bfa37fcf57424ffdb831bfcd221b5547b7df9b9c9aea3f7988395c13ae30d
+train accuracy 0.9832
+test accuracy 0.9829
+time train total 4.11 s; per step median 2.128 ms, mean 2.139 ms (1200 steps)
+peak GPU memory 236.0 MiB
